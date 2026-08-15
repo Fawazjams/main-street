@@ -1,69 +1,86 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MapView } from "@/components/MapView";
+import { BackgroundChecker } from "@/components/BackgroundChecker";
+import { seedListings } from "@/lib/seedListings";
+import type { Listing } from "@/lib/types";
+
+type TabKey = "map" | "checker";
 
 export default function Home() {
+  // Tab state lives here rather than inside a tab component, so merging the two
+  // views into one screen later is a rearrange instead of a rewrite.
+  const [tab, setTab] = useState<TabKey>("map");
+
+  // In memory for now. This becomes a Supabase query without the rest of the
+  // tree noticing, since everything downstream only reads Listing[].
+  const [listings, setListings] = useState<Listing[]>(seedListings);
+
+  const addToMap = (listing: Listing) => {
+    setListings((current) => {
+      // Match on the source URL, not the id: a listing already seeded on the map
+      // and the same listing arriving from a check are the same place. Checking
+      // it should upgrade the existing card, not drop a second pin on top.
+      const existing = current.findIndex((l) => l.sourceUrl === listing.sourceUrl);
+      if (existing === -1) return [listing, ...current];
+
+      const merged = [...current];
+      merged[existing] = { ...current[existing], ...listing, id: current[existing].id };
+      return merged;
+    });
+    setTab("map");
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <Tabs
+      value={tab}
+      onValueChange={(value) => setTab(value as TabKey)}
+      className="flex h-dvh flex-col gap-0"
+    >
+      <header className="flex shrink-0 items-center justify-between gap-6 border-b border-neutral-200 px-6 py-3">
+        <div>
+          <h1 className="text-base font-medium text-neutral-900">Arcosanti</h1>
+          <p className="text-xs text-neutral-500">Student housing near UT Austin</p>
+        </div>
+
+        <TabsList>
+          <TabsTrigger value="map">Map view</TabsTrigger>
+          <TabsTrigger value="checker">Background checker</TabsTrigger>
+        </TabsList>
+      </header>
+
+      {/*
+        keepMounted so switching tabs does not tear down and rebuild the map.
+
+        The explicit `hidden` class is not redundant. Base UI drops its own
+        `hidden` attribute only after the outgoing panel's animations settle,
+        which it detects inside a requestAnimationFrame - and rAF does not run
+        while the page is backgrounded. Without this class, switching tabs in a
+        hidden tab leaves both panels stacked on top of each other.
+
+        Also deliberately no `flex` utility here: Tailwind's `flex` class sits in
+        a later cascade layer than the `[hidden]` base rule and would beat it.
+      */}
+      <TabsContent
+        value="map"
+        keepMounted
+        className={tab === "map" ? "min-h-0 flex-1" : "hidden"}
+      >
+        <MapView listings={listings} active={tab === "map"} />
+      </TabsContent>
+
+      <TabsContent
+        value="checker"
+        keepMounted
+        className={tab === "checker" ? "min-h-0 flex-1" : "hidden"}
+      >
+        <BackgroundChecker
+          onAddToMap={addToMap}
+          verifiedUrls={listings.filter((l) => l.verified).map((l) => l.sourceUrl)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </TabsContent>
+    </Tabs>
   );
 }

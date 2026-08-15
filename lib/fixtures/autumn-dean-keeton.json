@@ -1,0 +1,391 @@
+{
+  "total": 1,
+  "rows": [
+    {
+      "listing_url": {
+        "value": "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui",
+        "reasoning": "Craigslist listing page: $1,350 / 1br - 550ft2, street address 926 E. Dean Keeton, posted 2026-07-30",
+        "source_id": "fa158"
+      },
+      "title": {
+        "value": "Furnished One Bedroom across from UT Campus",
+        "reasoning": "Craigslist listing page: $1,350 / 1br - 550ft2, street address 926 E. Dean Keeton, posted 2026-07-30",
+        "source_id": "fa158"
+      },
+      "address": {
+        "value": "926 E. Dean Keeton, Austin, TX 78705",
+        "reasoning": "Craigslist listing page: $1,350 / 1br - 550ft2, street address 926 E. Dean Keeton, posted 2026-07-30",
+        "source_id": "fa158"
+      },
+      "rent_usd": {
+        "value": 1350,
+        "reasoning": "Craigslist listing page: $1,350 / 1br - 550ft2, street address 926 E. Dean Keeton, posted 2026-07-30",
+        "source_id": "fa158"
+      },
+      "bedrooms": {
+        "value": 1,
+        "reasoning": "Craigslist listing page: $1,350 / 1br - 550ft2, street address 926 E. Dean Keeton, posted 2026-07-30",
+        "source_id": "fa158"
+      },
+      "bathrooms": {
+        "value": 1,
+        "reasoning": "Craigslist listing page: $1,350 / 1br - 550ft2, street address 926 E. Dean Keeton, posted 2026-07-30",
+        "source_id": "fa158"
+      },
+      "posted_date": {
+        "value": "2026-07-30",
+        "reasoning": "Craigslist listing page: $1,350 / 1br - 550ft2, street address 926 E. Dean Keeton, posted 2026-07-30",
+        "source_id": "fa158"
+      },
+      "rule_rent_at_market": {
+        "value": "match",
+        "evidence": [
+          [
+            "66816",
+            "926 E Dean Keeton St"
+          ],
+          [
+            "87913",
+            "926 E Dean Keeton St unit202 is listed for rent at 1,200"
+          ]
+        ],
+        "reasoning": "$1,350 furnished vs $950-$1,595 for units in the same building and $1,200 for the same 550 sqft unit unfurnished on MLS - within the normal range, not below market",
+        "source_id": "66816",
+        "source_ids": [
+          "87913",
+          "fa158"
+        ]
+      },
+      "rule_address_verifiable": {
+        "value": "match",
+        "evidence": [
+          [
+            "6ece3",
+            "The 5-unit apartment building at 926 E Dean Keeton St in the Hancock neighborhood is a three-story structure built in 1962, currently owned by 924 Dean Keeton Investors Ltd"
+          ]
+        ],
+        "reasoning": "Address resolves to a real recorded 5-unit rental building, parcel 0214070621, with a named owner of record",
+        "source_id": "6ece3",
+        "source_ids": [
+          "fa158",
+          "66816"
+        ]
+      },
+      "rule_phone_legitimate": {
+        "value": "unclear",
+        "evidence": [
+          [
+            "fa158",
+            "Contact Information:"
+          ],
+          [
+            "7224a",
+            "926 E Dean Keeton St"
+          ]
+        ],
+        "reasoning": "The post publishes no phone number at all (Craigslist relay contact), so no poster number can be traced; the building's own published leasing line (512) 472-9100 is legitimate but is not the number given in the ad",
+        "source_id": "fa158",
+        "source_ids": [
+          "7224a",
+          "66816"
+        ]
+      },
+      "rule_photos_original": {
+        "value": "match",
+        "evidence": [
+          [
+            "7224a",
+            "926 E Dean Keeton St"
+          ],
+          [
+            "fa158",
+            "Furnished One Bedroom across from UT Campus"
+          ]
+        ],
+        "reasoning": "Reverse image search maps the photos to marketing pages for this same building (ForRent/ForRentUniversity/Zillow 926 E Dean Keeton St), not to an unrelated property - no sign of stolen imagery",
+        "source_id": "7224a",
+        "source_ids": [
+          "fa158",
+          "66816"
+        ]
+      },
+      "_row_id": "row_4a19adc9e6b84c78",
+      "_lineage": {
+        "created_by_event": null,
+        "created_by_run": "run_dae997b1aa314b8d",
+        "materialized_by_events": [
+          "evt_d2684d431496459f"
+        ]
+      },
+      "_sources": {
+        "listing_url": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "title": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "address": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "rent_usd": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "bedrooms": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "bathrooms": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "posted_date": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "rule_rent_at_market": [
+          "https://www.rentable.co/austin-tx/926-e-dean-keeton-st",
+          "https://www.har.com/homedetail/926-e-dean-keeton-st-202-austin-tx-78705-us/15824454",
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "rule_address_verifiable": [
+          "https://augrented.com/austin/0214070621-926-e-dean-keeton-st",
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui",
+          "https://www.rentable.co/austin-tx/926-e-dean-keeton-st"
+        ],
+        "rule_phone_legitimate": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui",
+          "https://www.forrent.com/tx/austin/926-e-dean-keeton-st/1lzg5w5",
+          "https://www.rentable.co/austin-tx/926-e-dean-keeton-st"
+        ],
+        "rule_photos_original": [
+          "https://www.forrent.com/tx/austin/926-e-dean-keeton-st/1lzg5w5",
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui",
+          "https://www.rentable.co/austin-tx/926-e-dean-keeton-st"
+        ],
+        "phone": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "phone_trace": [
+          "https://www.forrent.com/tx/austin/926-e-dean-keeton-st/1lzg5w5",
+          "https://www.rentable.co/austin-tx/926-e-dean-keeton-st",
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui"
+        ],
+        "market_rent_comparison": [
+          "https://www.rentable.co/austin-tx/926-e-dean-keeton-st",
+          "https://www.forrent.com/tx/austin/926-e-dean-keeton-st/1lzg5w5",
+          "https://www.har.com/homedetail/926-e-dean-keeton-st-202-austin-tx-78705-us/15824454"
+        ],
+        "property_record": [
+          "https://augrented.com/austin/0214070621-926-e-dean-keeton-st"
+        ],
+        "image_findings": [
+          "https://www.forrentuniversity.com/tx/austin/926-e-dean-keeton-st/1lzg5w5",
+          "https://www.forrent.com/tx/austin/926-e-dean-keeton-st/1lzg5w5",
+          "https://www.bestrealestatetex.com/search/texas/austin/fellman-heights/926-e-dean-keeton-st-202-bid-39-6517972",
+          "https://www.forrent.com/es/tx/austin/926-e-dean-keeton-st/1lzg5w5"
+        ],
+        "risk_assessment": [
+          "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui",
+          "https://augrented.com/austin/0214070621-926-e-dean-keeton-st",
+          "https://www.har.com/homedetail/926-e-dean-keeton-st-202-austin-tx-78705-us/15824454",
+          "https://www.rentable.co/austin-tx/926-e-dean-keeton-st"
+        ]
+      },
+      "_validation": {
+        "listing_url": {
+          "s": "ok"
+        },
+        "title": {
+          "s": "ok"
+        },
+        "address": {
+          "s": "ok"
+        },
+        "rent_usd": {
+          "s": "ok"
+        },
+        "bedrooms": {
+          "s": "ok"
+        },
+        "bathrooms": {
+          "s": "ok"
+        },
+        "posted_date": {
+          "s": "ok"
+        },
+        "phone": {
+          "s": "ok"
+        },
+        "phone_trace": {
+          "s": "ok"
+        },
+        "market_rent_comparison": {
+          "s": "ok"
+        },
+        "property_record": {
+          "s": "ok"
+        },
+        "image_findings": {
+          "s": "ok"
+        },
+        "risk_assessment": {
+          "s": "ok"
+        },
+        "rule_rent_at_market": {
+          "s": "ok"
+        },
+        "rule_address_verifiable": {
+          "s": "ok"
+        },
+        "rule_phone_legitimate": {
+          "s": "ok"
+        },
+        "rule_photos_original": {
+          "s": "ok"
+        }
+      },
+      "phone": {
+        "value": null,
+        "absent": true,
+        "source_id": "fa158",
+        "reasoning": "The Craigslist post publishes no phone number; contact runs through Craigslist's anonymized reply relay only"
+      },
+      "phone_trace": {
+        "value": "No phone in the post itself (CL relay contact only). The publicly published leasing number for this building, Tower View Apartments at 926 E Dean Keeton St, is (512) 472-9100 per its ForRent/Rentable listings - a Austin landline-style local leasing line tied to the same address, not a number supplied by the poster.",
+        "source_ids": [
+          "7224a",
+          "66816",
+          "fa158"
+        ],
+        "reasoning": "Building leasing phone from ForRent.com/Rentable pages for 926 E Dean Keeton St; Craigslist page shows no phone"
+      },
+      "market_rent_comparison": {
+        "value": "Asking $1,350/mo for a furnished 550 sqft 1BR/1BA. Other units in the same 5-unit building are marketed at $950-$1,595 (ForRent/Rentable range for 926 E Dean Keeton St), and MLS/HAR shows unit 202, 550 sqft 1/1, listed at $1,200-$1,350. So the ask sits at the top of, but inside, the building's own range and is consistent with furnished West Campus/Hancock 1BRs - it is not a suspiciously below-market bait price.",
+        "source_ids": [
+          "66816",
+          "7224a",
+          "87913"
+        ],
+        "reasoning": "Same-building rent range $950-$1,595 and HAR listing for unit 202 at 550 sqft"
+      },
+      "property_record": {
+        "value": "Travis County parcel/assessor number 0214070621. The property is a 5-unit, three-story apartment building at 926 E Dean Keeton St (Hancock/near-UT), built in 1962, marketed as Tower View Apartments; owner of record is 924 Dean Keeton Investors Ltd.",
+        "source_ids": [
+          "6ece3"
+        ],
+        "reasoning": "Building record: 5-unit 1962 structure, parcel 0214070621, owned by 924 Dean Keeton Investors Ltd"
+      },
+      "image_findings": {
+        "value": "Google Lens reverse search on the 9 listing photos returns pages for the SAME address - ForRent.com and ForRentUniversity 926 E Dean Keeton St, Zillow/Trulia 'Tower View Apartments - 926 E Dean Keeton St', and HAR/Redfin unit pages. No photo traces to an unrelated property as its primary match; a few interior shots also surface generic visually-similar matches (other small Austin units, Airbnb rooms), which is normal for plain furnished-interior photos rather than evidence of theft.",
+        "source_ids": [
+          "a5a27",
+          "7224a",
+          "9ea22",
+          "7a892",
+          "7224a"
+        ],
+        "reasoning": "Reverse image search matched the listing photos to marketing pages for the same building"
+      },
+      "risk_assessment": {
+        "value": "Low apparent fraud risk. Green flags: the address is a real, appraisal-record 5-unit building (Tower View Apartments, parcel 0214070621, owner 924 Dean Keeton Investors Ltd); a 550 sqft 1BR/1BA at this exact address is concurrently listed on MLS/HAR and ForRent at $1,200-$1,350, matching the post's price, size and layout; and the photos reverse-search back to this same building rather than to another property. Residual caution: the post carries no phone or named agent (Craigslist relay only), so the poster's identity is unverified - confirm you are dealing with the building's leasing office ((512) 472-9100) or the named MLS agent, and never wire a deposit before an in-person unit viewing and a signed lease.",
+        "source_ids": [
+          "fa158",
+          "6ece3",
+          "87913",
+          "66816"
+        ],
+        "reasoning": "Synthesis of address record, price comps and image provenance checks"
+      }
+    }
+  ],
+  "output": {
+    "id": "listing-verification",
+    "name": "listing-verification",
+    "kind": "research",
+    "path": "outputs/listing-verification.jsonl",
+    "schema": {
+      "listing_url": {
+        "type": "url",
+        "description": "Craigslist listing URL",
+        "unique": true,
+        "priority": true
+      },
+      "title": {
+        "type": "str",
+        "description": "Listing title",
+        "priority": true
+      },
+      "address": {
+        "type": "str",
+        "description": "Address or location stated/implied by the listing",
+        "priority": true
+      },
+      "rent_usd": {
+        "type": "int",
+        "description": "Monthly rent asked",
+        "priority": true
+      },
+      "bedrooms": {
+        "type": "float",
+        "description": "Bedroom count",
+        "priority": false
+      },
+      "bathrooms": {
+        "type": "float",
+        "description": "Bathroom count",
+        "priority": false
+      },
+      "posted_date": {
+        "type": "date",
+        "description": "Post/update date",
+        "priority": false
+      },
+      "phone": {
+        "type": "phone",
+        "description": "Contact phone number in the listing",
+        "priority": true
+      },
+      "phone_trace": {
+        "type": "str",
+        "description": "What the phone number resolves to (owner, line type, carrier, other listings)",
+        "priority": true
+      },
+      "market_rent_comparison": {
+        "type": "str",
+        "description": "Comparison of asking rent to comparable furnished 1BR near UT Austin, with figures",
+        "priority": true
+      },
+      "property_record": {
+        "type": "str",
+        "description": "Travis County / public property record findings for the address (owner, parcel, use)",
+        "priority": true
+      },
+      "image_findings": {
+        "type": "str",
+        "description": "Reverse image search results for listing photos - reuse elsewhere or original",
+        "priority": true
+      },
+      "risk_assessment": {
+        "type": "str",
+        "description": "Overall scam-risk read with the specific red or green flags",
+        "priority": true
+      }
+    },
+    "schema_order": [
+      "listing_url",
+      "title",
+      "address",
+      "rent_usd",
+      "bedrooms",
+      "bathrooms",
+      "posted_date",
+      "phone",
+      "market_rent_comparison",
+      "property_record",
+      "image_findings",
+      "risk_assessment",
+      "phone_trace"
+    ],
+    "target_count": 1,
+    "created_at": "2026-08-15T00:58:03.225099+00:00",
+    "updated_at": "2026-08-15T00:58:03.225099+00:00"
+  },
+  "offset": 0
+}
