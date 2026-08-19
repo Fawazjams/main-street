@@ -67,6 +67,15 @@ export async function parseListing(url: string): Promise<ParsedListing> {
   const baths = first(html, /(\d+(?:\.\d+)?)\s*Ba\b/i);
   const sqft = first(html, /(\d[\d,]*)\s*ft<sup>2<\/sup>/i);
 
+  // Craigslist gives the application fee its own attribute rather than
+  // burying it in the body, so it is reliable when present.
+  const feeBlock = html.match(
+    /class="attr application_fee_explained"[\s\S]{0,300}?<\/div>/,
+  );
+  const applicationFee = feeBlock
+    ? decode(feeBlock[0]).replace(/^.*application fee details:\s*/i, "").trim() || null
+    : null;
+
   const bodyBlock = html.match(/id="postingbody"[\s\S]*?<\/section>/);
   let body: string | null = null;
   if (bodyBlock) {
@@ -108,6 +117,7 @@ export async function parseListing(url: string): Promise<ParsedListing> {
     bedrooms: beds ? Number(beds) : null,
     bathrooms: baths ? Number(baths) : null,
     sqft: sqft ? Number(sqft.replace(/,/g, "")) : null,
+    applicationFee,
     pin: lat && lng ? { lat: Number(lat), lng: Number(lng) } : null,
     mapAddress: first(html, /class="mapaddress"[^>]*>([^<]+)</),
     body,

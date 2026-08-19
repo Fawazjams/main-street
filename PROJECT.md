@@ -86,6 +86,8 @@ lib/
     pinDistance.ts          map pin vs stated address
     parcel.ts               Travis County appraisal records
     market.ts               Census geocoder -> HUD Fair Market Rent
+    depositLanguage.ts      payment-language patterns in the body
+    applicationFee.ts       fee amount and household total
     areaCode.ts             offline area-code region tagging
     investigate.ts          runs the checks concurrently
     toMapListing.ts         investigation -> map listing
@@ -123,8 +125,19 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
 
 **Checker**
 - `parseListing` pulls title, price, layout, sqft, posted date, photos, body,
-  contacts, and the map pin from a live post.
-- Four checks run concurrently, results render as claim vs found.
+  contacts, the application fee, and the map pin from a live post.
+- Six checks run, results render as claim vs found.
+- **Deposit-trap language.** Four categories: irreversible payment methods,
+  money before viewing, a poster who says they are not local, and a unit that
+  cannot be shown. Matches are quoted in context with the reason each is worth
+  a second read. Generic urgency ("available now", "act fast") is deliberately
+  not matched — it appears in most honest ads, and flagging it would train the
+  reader to skip this section.
+- **Application fee.** Reads Craigslist's own field, falling back to the body,
+  and multiplies a per-person fee by the bedroom count so the household total
+  is visible before anyone applies.
+- Checks that read the post rather than an outside source set `foundLabel` so
+  the UI does not print "Records say" over the listing's own words.
 - "Add to map" dedupes by source URL, so checking a seeded listing upgrades that
   card instead of dropping a second pin.
 
@@ -148,8 +161,17 @@ No single number declares listing 2 a scam, and the app never does either. Three
 facts sitting next to each other do the work. That is the no-scoring principle
 paying off, and it is worth showing exactly this way.
 
-### Written but never executed
+Listing 1 publishes a `$65 per person` application fee; the other two publish
+none.
 
+### Written but never executed on real positives
+
+- **Deposit-trap language.** All three seed listings are clean, so the detector
+  has only ever returned its no-hits result on live data. Every category was
+  verified against synthetic scam text (Zelle, wire transfer, "out of the
+  country", "cannot show the unit", "secure the unit") and all four fired, with
+  no false positive on listing 1's "Available for move in ASAP!". A real
+  positive listing would be worth capturing as a fixture.
 - **Area-code region.** None of the three seed listings publish a phone number,
   so that branch has never fired.
 
@@ -157,9 +179,7 @@ paying off, and it is worth showing exactly this way.
 
 | | Needs |
 |---|---|
-| Deposit-trap language check | nothing — body text is already parsed |
-| Application fee extraction | nothing — it is in the markup already |
-| Fee-churn pattern detection | our own corpus over time |
+| Fee-churn pattern detection | our own corpus over time; the fee itself is now extracted |
 | Supabase auth + persistence | listings are in-memory, reset on reload |
 | Caching by listing URL | — |
 | "Where are you going to school?" landing page | — |

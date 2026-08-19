@@ -190,7 +190,7 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
                     </div>
                     <div className="rounded border border-neutral-100 bg-neutral-50 p-2.5">
                       <p className="text-[11px] uppercase tracking-wide text-neutral-500">
-                        Records say
+                        {finding.foundLabel ?? "Records say"}
                       </p>
                       <p className="mt-1 text-xs text-neutral-900">{finding.found ?? "—"}</p>
                     </div>
@@ -198,7 +198,9 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
                 )}
 
                 {finding.note && (
-                  <p className="mt-3 text-sm leading-relaxed text-neutral-700">{finding.note}</p>
+                  <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-neutral-700">
+                    {finding.note}
+                  </p>
                 )}
                 {finding.reason && (
                   <p className="mt-2 text-sm text-neutral-500">{finding.reason}</p>

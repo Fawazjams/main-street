@@ -18,6 +18,11 @@ export interface Finding {
   claim?: string;
   /** What the independent lookup returned. */
   found?: string;
+  /**
+   * Overrides the "Records say" heading. Checks that read the post itself
+   * rather than an outside source must not imply independent confirmation.
+   */
+  foundLabel?: string;
   /** A plain factual observation, e.g. "1.2 miles from the stated address". */
   note?: string;
   /** Why this check did not run, when it was skipped. */
@@ -32,6 +37,8 @@ export interface ParsedListing {
   bedrooms: number | null;
   bathrooms: number | null;
   sqft: number | null;
+  /** Craigslist publishes this as its own field, e.g. "$65 per person". */
+  applicationFee: string | null;
   /** The Craigslist map pin. Posters can move this away from the real address. */
   pin: { lat: number; lng: number } | null;
   /** The address text shown under the map, when the poster supplied one. */

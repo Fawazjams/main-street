@@ -3,6 +3,8 @@ import { checkParcel } from "./parcel";
 import { checkPinDistance } from "./pinDistance";
 import { checkPhoneRegion } from "./areaCode";
 import { checkMarketRent } from "./market";
+import { checkDepositLanguage } from "./depositLanguage";
+import { checkApplicationFee } from "./applicationFee";
 import type { Investigation, ParsedListing } from "./types";
 
 export interface InvestigationResult extends Investigation {
@@ -27,13 +29,17 @@ export async function investigate(url: string): Promise<InvestigationResult> {
     checkPinDistance(listing),
     checkMarketRent(listing),
   ]);
+  // These two read text we already have, so they cost nothing and cannot fail
+  // on the network - no reason to await them alongside the remote lookups.
   const phone = checkPhoneRegion(listing);
+  const deposit = checkDepositLanguage(listing);
+  const fee = checkApplicationFee(listing);
 
   return {
     url,
     checkedAt: new Date().toISOString(),
     listing,
     geocoded: pin.geocoded,
-    findings: [pin.finding, parcel, market, phone],
+    findings: [pin.finding, parcel, market, deposit, fee, phone],
   };
 }
