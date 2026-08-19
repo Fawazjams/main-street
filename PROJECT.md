@@ -1,4 +1,4 @@
-# Arcosanti
+# Main Street
 
 Student housing marketplace with a verification layer. Built for the Stellic
 Pathfinders Challenge 2026.
@@ -58,8 +58,8 @@ reintroduce one.
 | Map | Mapbox GL JS |
 | Backend | Next route handlers. Supabase planned, not wired |
 
-The package name is `arcosanti` (lowercase) because npm rejects the capital in
-the directory name.
+The npm package name is `main-street`. The project was called Arcosanti until
+August 2026; the working directory on disk still uses the old name.
 
 ---
 

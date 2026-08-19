@@ -41,7 +41,7 @@ export default function Home() {
     >
       <header className="flex shrink-0 items-center justify-between gap-6 border-b border-neutral-200 px-6 py-3">
         <div>
-          <h1 className="text-base font-medium text-neutral-900">Arcosanti</h1>
+          <h1 className="text-base font-medium text-neutral-900">Main Street</h1>
           <p className="text-xs text-neutral-500">Student housing near UT Austin</p>
         </div>
 

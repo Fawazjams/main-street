@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Arcosanti — student housing",
+  title: "Main Street — student housing",
   description:
     "Find and verify off-campus student housing. Check a listing before you tour it.",
 };
