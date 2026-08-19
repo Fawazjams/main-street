@@ -230,6 +230,21 @@ The parser handles both, but if that check ever starts reporting "not run",
 
 ## Decisions worth not relitigating
 
+**Urgency language is not matched, on purpose.** `depositLanguage.ts` looks for
+irreversible payment methods, money before viewing, an absent poster, and a unit
+that cannot be shown. It deliberately ignores "available now", "act fast",
+"first come first served", and "ASAP". Those phrases appear in most honest
+rental ads — seed listing 1 says "Available for move in ASAP!" — so matching
+them would flag legitimate posts constantly and teach students to skip this
+section entirely. A check that cries wolf is worse than no check. Adding urgency
+patterns looks like an easy win and is not one.
+
+**Checks that read the post do not say "Records say".** The claim-vs-found
+layout implies an independent source confirmed something. `depositLanguage` and
+`applicationFee` read the listing itself, so they either set `foundLabel` to
+something honest or omit the comparison entirely. Never let a check restate the
+post's own words under a heading that implies verification.
+
 **Base UI tab panels, and the redundant `hidden` class.** `page.tsx` sets an
 explicit `hidden` class on the inactive panel *in addition to* Base UI's own
 attribute. This is not redundant. Base UI drops its `hidden` only after the
