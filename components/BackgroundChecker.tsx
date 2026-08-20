@@ -4,11 +4,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FmrLadder } from "@/components/checks/FmrLadder";
-import { PinMap } from "@/components/checks/PinMap";
 import { PhotoStrip } from "@/components/PhotoStrip";
+import { FindingList } from "@/components/FindingList";
 import { cn } from "@/lib/utils";
-import type { Finding, FindingState, ParsedListing } from "@/lib/checks/types";
+import type { Finding, ParsedListing } from "@/lib/checks/types";
 import type { Listing } from "@/lib/types";
 
 interface InvestigationResponse {
@@ -16,25 +15,13 @@ interface InvestigationResponse {
   listing: ParsedListing;
   findings: Finding[];
   mapListing: Listing | null;
+  /** True when these findings came from the shared store, not a fresh run. */
+  fromStore?: boolean;
+  checkedAt?: string;
   readBy: "craigslist-parser" | "claude";
 }
 
 type Mode = "url" | "text";
-
-const STATE_LABEL: Record<FindingState, string> = {
-  found: "Checked",
-  "not-found": "No record",
-  skipped: "Not run",
-  error: "Failed",
-};
-
-// One neutral treatment for every state. Colouring "found" green would turn a
-// lookup that merely succeeded into a reassurance.
-const CHIP =
-  "shrink-0 rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-xs text-neutral-600";
-
-const SECTION_LABEL =
-  "text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-400";
 
 function Fact({ children }: { children: React.ReactNode }) {
   return (
@@ -45,11 +32,10 @@ function Fact({ children }: { children: React.ReactNode }) {
 }
 
 interface BackgroundCheckerProps {
-  onAddToMap: (listing: Listing) => void;
-  verifiedUrls: string[];
+  onShowOnMap: (listing: Listing) => void;
 }
 
-export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundCheckerProps) {
+export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
   const [mode, setMode] = useState<Mode>("url");
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
@@ -58,7 +44,6 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
   const [result, setResult] = useState<InvestigationResponse | null>(null);
 
   const mapListing = result?.mapListing ?? null;
-  const added = mapListing !== null && verifiedUrls.includes(mapListing.sourceUrl);
 
   async function runCheck() {
     let payload: { url?: string; text?: string };
@@ -210,8 +195,8 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
           <div className="mt-10 rounded-lg border border-dashed border-neutral-300 px-6 py-10 text-center">
             <p className="text-sm font-medium text-neutral-900">Nothing checked yet</p>
             <p className="mx-auto mt-1 max-w-sm text-sm text-neutral-600">
-              Checked listings get added to the map, so the next student searching your campus
-              sees what you found.
+              Whatever you check is saved to the shared map, so the next student searching
+              your campus reads what you found instead of paying to find it again.
             </p>
           </div>
         )}
@@ -260,86 +245,20 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
               </p>
             </section>
 
-            <div className="mt-8 space-y-8">
-              {result.findings.map((finding) => (
-                <section key={finding.id}>
-                  <div className="flex items-center justify-between gap-3 border-b border-neutral-200 pb-2">
-                    <h4 className={SECTION_LABEL}>{finding.label}</h4>
-                    <span className={CHIP}>{STATE_LABEL[finding.state]}</span>
-                  </div>
+            {result.fromStore && (
+              <div className="mt-8 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3">
+                <p className="text-sm text-orange-900">
+                  Another student already checked this one
+                  {result.checkedAt
+                    ? ` on ${new Date(result.checkedAt).toLocaleDateString()}`
+                    : ""}
+                  . These are their findings — nothing was re-run, and nothing was spent.
+                </p>
+              </div>
+            )}
 
-                  {finding.claim && (
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                      <div>
-                        <p className={SECTION_LABEL}>The post says</p>
-                        <p className="mt-1 text-sm text-neutral-900">{finding.claim}</p>
-                      </div>
-                      <div>
-                        <p className={SECTION_LABEL}>{finding.foundLabel ?? "Records say"}</p>
-                        <p className="mt-1 text-sm text-neutral-900">{finding.found ?? "—"}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {finding.data?.kind === "fmr-ladder" && (
-                    <FmrLadder
-                      bars={finding.data.bars}
-                      listingPrice={finding.data.listingPrice}
-                      area={finding.data.area}
-                      year={finding.data.year}
-                    />
-                  )}
-                  {finding.data?.kind === "pin-map" && (
-                    <PinMap
-                      pin={finding.data.pin}
-                      geocoded={finding.data.geocoded}
-                      miles={finding.data.miles}
-                      address={finding.data.address}
-                    />
-                  )}
-
-                  {finding.note && (
-                    <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-neutral-800">
-                      {finding.note}
-                    </p>
-                  )}
-                  {finding.reason && (
-                    <p className="mt-3 text-sm text-neutral-500">{finding.reason}</p>
-                  )}
-
-                  {finding.why && (
-                    <details className="group mt-3">
-                      <summary className="cursor-pointer list-none text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-400 hover:text-neutral-700">
-                        <span className="inline-block transition-transform group-open:rotate-90">
-                          ›
-                        </span>{" "}
-                        Why this matters
-                      </summary>
-                      <p className="mt-2 border-l-2 border-neutral-200 pl-3 text-sm leading-relaxed text-neutral-600">
-                        {finding.why}
-                      </p>
-                    </details>
-                  )}
-
-                  {finding.source && (
-                    <p className="mt-3 text-[11px] text-neutral-400">
-                      Source:{" "}
-                      {finding.source.url ? (
-                        <a
-                          href={finding.source.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="underline underline-offset-2 hover:text-neutral-700"
-                        >
-                          {finding.source.label}
-                        </a>
-                      ) : (
-                        finding.source.label
-                      )}
-                    </p>
-                  )}
-                </section>
-              ))}
+            <div className="mt-8">
+              <FindingList findings={result.findings} />
             </div>
 
             {mapListing && (
@@ -353,8 +272,8 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
                     {mapListing.coords ? "" : " · no location to pin"}
                   </p>
                 </div>
-                <Button variant="outline" disabled={added} onClick={() => onAddToMap(mapListing)}>
-                  {added ? "On the map" : "Add to map"}
+                <Button variant="outline" onClick={() => onShowOnMap(mapListing)}>
+                  View on map
                 </Button>
               </div>
             )}

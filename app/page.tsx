@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapView } from "@/components/MapView";
 import { BackgroundChecker } from "@/components/BackgroundChecker";
 import { seedListings } from "@/lib/seedListings";
 import type { Listing } from "@/lib/types";
+import type { StoredListing } from "@/lib/db/listings";
 
 type TabKey = "map" | "checker";
 
@@ -14,24 +15,44 @@ export default function Home() {
   // views into one screen later is a rearrange instead of a rewrite.
   const [tab, setTab] = useState<TabKey>("map");
 
-  // In memory for now. This becomes a Supabase query without the rest of the
-  // tree noticing, since everything downstream only reads Listing[].
+  // Seeds are the starting point and the fallback. Once Supabase answers, the
+  // shared map replaces them - and a database that is down or unconfigured
+  // leaves a working demo rather than an empty page.
   const [listings, setListings] = useState<Listing[]>(seedListings);
+  const [persisted, setPersisted] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const addToMap = (listing: Listing) => {
-    setListings((current) => {
-      // Match on the source URL, not the id: a listing already seeded on the map
-      // and the same listing arriving from a check are the same place. Checking
-      // it should upgrade the existing card, not drop a second pin on top.
-      const existing = current.findIndex((l) => l.sourceUrl === listing.sourceUrl);
-      if (existing === -1) return [listing, ...current];
+  const refresh = useCallback(async () => {
+    try {
+      const response = await fetch("/api/listings");
+      const data = await response.json();
+      if (data.configured && Array.isArray(data.listings) && data.listings.length > 0) {
+        setListings(data.listings as StoredListing[]);
+        setPersisted(true);
+      }
+    } catch {
+      // Keep the seeds. The map is still useful without the shared corpus.
+    }
+  }, []);
 
-      const merged = [...current];
-      merged[existing] = { ...current[existing], ...listing, id: current[existing].id };
-      return merged;
-    });
-    setTab("map");
-  };
+  useEffect(() => {
+    // Loading the shared map on mount. The rule guards against cascading
+    // renders from synchronous setState; this one lands after a network round
+    // trip, and the database is exactly the external system effects are for.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refresh();
+  }, [refresh]);
+
+  // Checking a listing stores it, so there is nothing to "add" afterwards -
+  // this pulls the shared map back down and points at what was just checked.
+  const showOnMap = useCallback(
+    async (listing: Listing) => {
+      await refresh();
+      setSelectedId(listing.id);
+      setTab("map");
+    },
+    [refresh],
+  );
 
   return (
     <Tabs
@@ -68,7 +89,13 @@ export default function Home() {
         keepMounted
         className={tab === "map" ? "min-h-0 flex-1" : "hidden"}
       >
-        <MapView listings={listings} active={tab === "map"} />
+        <MapView
+          listings={listings}
+          active={tab === "map"}
+          persisted={persisted}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+        />
       </TabsContent>
 
       <TabsContent
@@ -76,10 +103,7 @@ export default function Home() {
         keepMounted
         className={tab === "checker" ? "min-h-0 flex-1" : "hidden"}
       >
-        <BackgroundChecker
-          onAddToMap={addToMap}
-          verifiedUrls={listings.filter((l) => l.verified).map((l) => l.sourceUrl)}
-        />
+        <BackgroundChecker onShowOnMap={showOnMap} />
       </TabsContent>
     </Tabs>
   );

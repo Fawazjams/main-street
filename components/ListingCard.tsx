@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { perPersonRent, type Listing } from "@/lib/types";
 import { photoAt } from "@/lib/photos";
-import type { WalkRoute } from "@/lib/walk";
 
 interface ListingCardProps {
   listing: Listing;
@@ -13,8 +12,6 @@ interface ListingCardProps {
   onSelect: (id: string) => void;
   /** How many people are splitting the rent. */
   groupSize: number;
-  /** Walk to campus, once it has been fetched. */
-  walk: WalkRoute | null;
 }
 
 export function ListingCard({
@@ -22,7 +19,6 @@ export function ListingCard({
   selected,
   onSelect,
   groupSize,
-  walk,
 }: ListingCardProps) {
   const placed = listing.coords !== null;
   const share = perPersonRent(listing, groupSize);
@@ -80,16 +76,6 @@ export function ListingCard({
         </p>
       )}
 
-      {walk && (
-        <p className="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-600">
-          <span
-            aria-hidden="true"
-            className="inline-block h-1.5 w-1.5 rounded-full bg-orange-600"
-          />
-          {walk.minutes} min walk to campus
-          <span className="text-neutral-400">({walk.miles.toFixed(1)} mi)</span>
-        </p>
-      )}
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
         {listing.verified ? (

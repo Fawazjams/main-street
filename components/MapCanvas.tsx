@@ -5,6 +5,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { Coords, Listing } from "@/lib/types";
 import { CAMPUS } from "@/lib/campus";
+import type { WalkRoute } from "@/lib/walk";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -64,14 +65,43 @@ function addCampusLayers(map: mapboxgl.Map) {
   }
 }
 
+/**
+ * The point halfway along the route by distance rather than by index.
+ *
+ * Route geometry bunches up around corners, so the middle array element can sit
+ * well off the visual centre — which is where the label wants to be.
+ */
+function midpointOf(path: Coords[]): Coords {
+  const seg: number[] = [];
+  let total = 0;
+  for (let i = 1; i < path.length; i += 1) {
+    const d = Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]);
+    seg.push(d);
+    total += d;
+  }
+
+  let run = 0;
+  for (let i = 0; i < seg.length; i += 1) {
+    if (run + seg[i] >= total / 2) {
+      const t = seg[i] === 0 ? 0 : (total / 2 - run) / seg[i];
+      return [
+        path[i][0] + (path[i + 1][0] - path[i][0]) * t,
+        path[i][1] + (path[i + 1][1] - path[i][1]) * t,
+      ];
+    }
+    run += seg[i];
+  }
+  return path[Math.floor(path.length / 2)];
+}
+
 interface MapCanvasProps {
   listings: Listing[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   /** False while the map sits inside a hidden tab panel. */
   active: boolean;
-  /** Walking path from the selected listing to campus, when we have one. */
-  walkPath: Coords[] | null;
+  /** Walking route from the selected listing to campus, when we have one. */
+  walk: WalkRoute | null;
 }
 
 export default function MapCanvas({
@@ -79,12 +109,13 @@ export default function MapCanvas({
   selectedId,
   onSelect,
   active,
-  walkPath,
+  walk,
 }: MapCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const onSelectRef = useRef(onSelect);
+  const walkLabelRef = useRef<mapboxgl.Marker | null>(null);
   const [styleReady, setStyleReady] = useState(false);
 
   // Kept in a ref so marker click handlers, attached once to raw DOM nodes,
@@ -118,6 +149,8 @@ export default function MapCanvas({
     mapRef.current = map;
 
     return () => {
+      walkLabelRef.current?.remove();
+      walkLabelRef.current = null;
       markers.forEach((m) => m.remove());
       markers.clear();
       map.remove();
@@ -186,33 +219,61 @@ export default function MapCanvas({
     markersRef.current.forEach((marker, id) => {
       marker.getElement().dataset.selected = String(id === selectedId);
     });
-
-    const target = placed.find((l) => l.id === selectedId);
-    if (mapRef.current && target) {
-      mapRef.current.flyTo({ center: target.coords!, zoom: 16, duration: 900 });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, listings]);
 
-  // Redraw the dashed walking path whenever the selection changes. Cleared to
-  // an empty collection rather than removed, so the layer keeps its place in
-  // the stack instead of being torn down and re-added.
+  /**
+   * Draw the route, label it, and frame both ends.
+   *
+   * Selecting a listing frames the whole walk rather than zooming into the pin:
+   * the question being asked is "how far is this from campus", and a close-up
+   * of the pin is the one view that cannot answer it. The route arrives
+   * asynchronously, so this re-runs when it lands and reframes then.
+   *
+   * The label is a DOM marker rather than a symbol layer - no font dependency,
+   * and it styles with the same Tailwind as the price pins.
+   */
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !styleReady) return;
-    const source = map.getSource(WALK_SOURCE) as mapboxgl.GeoJSONSource | undefined;
-    if (!source) return;
 
-    source.setData(
-      walkPath && walkPath.length > 1
+    const path = walk?.geometry ?? null;
+    const source = map.getSource(WALK_SOURCE) as mapboxgl.GeoJSONSource | undefined;
+    source?.setData(
+      path && path.length > 1
         ? {
             type: "Feature",
             properties: {},
-            geometry: { type: "LineString", coordinates: walkPath as unknown as number[][] },
+            geometry: { type: "LineString", coordinates: path as unknown as number[][] },
           }
         : EMPTY,
     );
-  }, [walkPath, styleReady]);
+
+    walkLabelRef.current?.remove();
+    walkLabelRef.current = null;
+
+    const target = placed.find((l) => l.id === selectedId);
+    if (!target) return;
+
+    if (walk && path && path.length > 1) {
+      const bounds = path.reduce(
+        (acc, point) => acc.extend(point as [number, number]),
+        new mapboxgl.LngLatBounds(path[0] as [number, number], path[0] as [number, number]),
+      );
+      map.fitBounds(bounds, { padding: 90, maxZoom: 15, duration: 900 });
+
+      const el = document.createElement("div");
+      el.className =
+        "whitespace-nowrap rounded-full bg-orange-600 px-2.5 py-1 text-xs font-medium text-white shadow-sm";
+      el.textContent = `${walk.minutes} min walk · ${walk.miles.toFixed(1)} mi`;
+      walkLabelRef.current = new mapboxgl.Marker({ element: el })
+        .setLngLat(midpointOf(path))
+        .addTo(map);
+    } else {
+      // No route yet, or none to be had. Centre the pin and wait.
+      map.flyTo({ center: target.coords!, zoom: 15, duration: 900 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, walk, styleReady, listings]);
 
   // The panel stays mounted while hidden so the map is not torn down on every
   // tab switch, but a map sized inside a hidden element measures 0x0.

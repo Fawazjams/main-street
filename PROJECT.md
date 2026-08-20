@@ -70,12 +70,15 @@ app/
   page.tsx                  tab state + shell, owns the listings array
   layout.tsx
   api/investigate/route.ts  the checker endpoint (any URL, or pasted text)
+  api/listings/route.ts     the shared map, with findings attached
 components/
   MapView.tsx               sidebar + map panel
   MapCanvas.tsx             mapbox-gl, dynamic ssr:false
   ListingCard.tsx
   BackgroundChecker.tsx     claim-vs-found rendering
   PhotoStrip.tsx            listing photos, lead image plus thumbnails
+  ListingDetail.tsx         one listing: photos, split, walk, findings
+  FindingList.tsx           claim-vs-record rendering, shared by both views
   GroupSizePicker.tsx       how many people are splitting the rent
   checks/
     FmrLadder.tsx           HUD bedroom ladder with the rent drawn across it
@@ -88,6 +91,9 @@ lib/
   photos.ts                 Craigslist photo size variants
   campus.ts                 UT Austin outline and walking destination
   walk.ts                   Mapbox walking route to campus, cached
+  db/
+    client.ts               Supabase client, null when unconfigured
+    listings.ts             listings + investigations read and write
   checks/
     types.ts                Finding, ParsedListing, Investigation
     parseListing.ts         fetch + parse a Craigslist post
@@ -166,6 +172,30 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
   thumbnail strip, each linking to the full size.
 - This is only *displaying* the photos. Nothing checks whether they belong to
   the property — that needs a reverse-image index, which stays paid.
+
+**Persistence**
+- Supabase, with `listings` and `investigations` as separate tables. A listing
+  is a place; an investigation is what someone learned about it on a given day.
+  Keeping them apart is what makes the findings survive onto the shared map.
+- Checking a listing saves it. Checking one that has already been checked
+  returns the stored findings instantly, says who found them and when, and
+  spends nothing — the accumulation claim, demonstrated rather than asserted.
+- Every read and write goes through route handlers, never the browser. There is
+  no auth yet, so the row-level policies are wide open; the server being the
+  only caller is the one thing keeping the anon key off the client.
+- The whole thing degrades: no Supabase means the seed listings and a "not
+  saved yet" note, so a fresh clone still demos.
+- `npm run db:seed` loads the three seed listings. Deliberately listings only,
+  no findings — watching a check populate one is the demo.
+
+**Listing detail**
+- Clicking a pin or a card opens the listing in the sidebar: photos, layout,
+  walk time, the rent split, and the full findings from whoever checked it.
+- The open listing lives in the URL (`?listing=<id>`), so the view is
+  shareable and survives a refresh, and back/forward move between listings.
+  That link is what group invites will hang off.
+- `FindingList` is shared with the checker, so a student arriving from the map
+  sees exactly what the student who ran the check saw.
 
 **Distance to campus**
 - Every placed listing shows its walking time and distance to campus. Selecting
@@ -256,18 +286,11 @@ the UI says so.
 
 ### What is missing, in priority order
 
-**P0 — the core claim does not hold without these**
+**P0 — auth, and what it unlocks**
 
-1. **Store findings with the listing.** A mapped listing keeps ten fields and a
-   `verified` flag; all seven check results are discarded. "The second student
-   gets the first student's findings" is currently false. Design the Supabase
-   schema around an `investigations` table keyed to the listing, not just
-   `listings` — otherwise the gap gets baked in.
-2. **Listing detail view.** Nowhere shows a listing's findings from the map.
-   Clicking a pin flies the camera and nothing else. This screen is also where
-   tours, saving, and group sharing attach — it turns three features into one.
-3. **Supabase persistence + auth.** Listings are in memory and reset on reload.
-   Auth is the prerequisite for tours and groups, so it comes first.
+1. **Supabase auth.** Persistence is done; auth is not, and it is the
+   prerequisite for tours and groups. It is also what lets the row-level
+   policies stop being wide open.
 
 **P1 — a judge notices these missing**
 
