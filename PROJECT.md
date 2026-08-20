@@ -178,9 +178,12 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
   and the drawn path the same thing.
 - Walking only for now. Bikes and cars are the same endpoint with a different
   profile.
-- The campus outline is hand-drawn and approximate — OpenStreetMap has the real
-  boundary but its API is unreachable from here. It says "campus is over here",
-  not where the property line runs. Walking times measure to the Tower.
+- The campus outline is the real OpenStreetMap boundary, fetched through
+  Nominatim and simplified from 106 points to 38. OSM returns UT as eleven
+  rings because the university owns land across Austin, so `campus.ts` keeps
+  the ring containing the Tower. Overpass is unreachable from here; Nominatim
+  with `polygon_geojson=1` is the route that works. Walking times measure to
+  the Tower.
 - Real figures: Dean Keeton is 20 min / 1.0 mi, 45th and Speedway 36 min /
   1.9 mi.
 
