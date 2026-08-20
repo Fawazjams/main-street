@@ -10,6 +10,28 @@
 
 export type FindingState = "found" | "not-found" | "skipped" | "error";
 
+/**
+ * Some findings are far easier to read as a picture than a sentence. A rent
+ * sitting under every bar on the local ladder, or two pins with a line between
+ * them, lands before the words do.
+ */
+export type FindingData =
+  | {
+      kind: "fmr-ladder";
+      /** HUD's whole bedroom ladder, so the listing has context to sit in. */
+      bars: { label: string; value: number; highlight: boolean }[];
+      listingPrice: number;
+      area: string;
+      year?: string;
+    }
+  | {
+      kind: "pin-map";
+      pin: { lat: number; lng: number };
+      geocoded: { lat: number; lng: number };
+      miles: number;
+      address: string;
+    };
+
 export interface Finding {
   id: string;
   label: string;
@@ -25,6 +47,13 @@ export interface Finding {
   foundLabel?: string;
   /** A plain factual observation, e.g. "1.2 miles from the stated address". */
   note?: string;
+  /**
+   * Why a reader should care about this check at all. Rendered quietly under
+   * the finding. Explains the pattern, never judges this particular listing.
+   */
+  why?: string;
+  /** Structured payload for checks that render as more than text. */
+  data?: FindingData;
   /** Why this check did not run, when it was skipped. */
   reason?: string;
   source?: { label: string; url?: string };

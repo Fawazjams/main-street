@@ -17,6 +17,9 @@ import type { Finding, ParsedListing } from "./types";
  * trains the reader to ignore this section - which costs more than it catches.
  */
 
+const WHY =
+  "Two things make a deposit unrecoverable: paying before you have seen the unit, and paying by a method with no chargeback. A scam needs both, so the language asking for them is the earliest warning a post gives. Plenty of honest landlords take a holding deposit — knowing that is what you are being asked for is what makes you harder to rush.";
+
 interface Pattern {
   category: string;
   why: string;
@@ -91,6 +94,7 @@ export function checkDepositLanguage(listing: ParsedListing): Finding {
       ...base,
       state: "found",
       note: "Nothing in the post asks for money up front, names an irreversible payment method, or says the unit cannot be shown. That is what an ordinary listing looks like — it is not a guarantee about anything that happens after you make contact.",
+      why: WHY,
     };
   }
 
@@ -118,5 +122,6 @@ export function checkDepositLanguage(listing: ParsedListing): Finding {
     ...base,
     state: "found",
     note: `${count}\n\n${note}`,
+    why: WHY,
   };
 }

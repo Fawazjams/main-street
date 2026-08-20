@@ -79,9 +79,17 @@ export async function checkPinDistance(
     finding: {
       ...base,
       state: "found",
-      claim: `Pin at ${listing.pin.lat.toFixed(5)}, ${listing.pin.lng.toFixed(5)}`,
-      found: `${listing.mapAddress} geocodes to ${geocoded.lat.toFixed(5)}, ${geocoded.lng.toFixed(5)}`,
+      claim: `Pin dropped at ${listing.pin.lat.toFixed(5)}, ${listing.pin.lng.toFixed(5)}`,
+      found: `${listing.mapAddress} is at ${geocoded.lat.toFixed(5)}, ${geocoded.lng.toFixed(5)}`,
       note: `The map pin sits ${distance} from the address written in the post.`,
+      why: "Craigslist lets a poster drag the pin anywhere, independently of the address they type. Real listings put the two in the same place, give or take the width of a building. A pin a long way from its own address means one of the two is not where the unit is.",
+      data: {
+        kind: "pin-map",
+        pin: listing.pin,
+        geocoded,
+        miles,
+        address: listing.mapAddress,
+      },
     },
     geocoded,
   };

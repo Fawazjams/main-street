@@ -120,12 +120,25 @@ export async function checkMarketRent(listing: ParsedListing): Promise<Finding> 
 
     const delta = ((listing.price - fmr) / fmr) * 100;
     const direction = delta < 0 ? "below" : "above";
+    const wanted = Math.max(0, Math.min(4, Math.round(bedrooms)));
+    const basic = (Array.isArray(data.basicdata) ? data.basicdata[0] : data.basicdata) ?? {};
+
+    // Keep the whole ladder, not just the one figure. A rent sitting under
+    // every bar reads very differently from one sitting under its own.
+    const bars = BEDROOM_KEY.map((key, index) => ({
+      label: index === 0 ? "Studio" : `${index}BR`,
+      value: Number(basic[key]),
+      highlight: index === wanted,
+    })).filter((bar) => Number.isFinite(bar.value) && bar.value > 0);
+
     return {
       ...base,
       state: "found",
       claim: `Asking $${listing.price.toLocaleString()}/mo for ${bedrooms} bedroom${bedrooms === 1 ? "" : "s"}`,
       found: `HUD Fair Market Rent for ${area}${year ? ` (${year})` : ""} is $${fmr.toLocaleString()}/mo`,
-      note: `The asking rent is ${Math.abs(delta).toFixed(0)}% ${direction} the benchmark. Fair Market Rent is HUD's 40th-percentile figure for a standard unit, so a modest gap either way is ordinary; a listing far below it is the number worth pausing on.`,
+      note: `The asking rent is ${Math.abs(delta).toFixed(0)}% ${direction} the benchmark.`,
+      why: "Fair Market Rent is HUD's 40th-percentile figure for a standard unit in this area, so honest listings cluster near it and a modest gap either way is ordinary. A price set far below the line is the classic hook — cheap enough to rush someone into paying a deposit before they see the place. The gap alone proves nothing; it is the reason to check everything else.",
+      data: bars.length > 0 ? { kind: "fmr-ladder", bars, listingPrice: listing.price, area, year } : undefined,
     };
   } catch {
     return { ...base, state: "error", reason: "Could not reach HUD." };

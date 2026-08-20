@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FmrLadder } from "@/components/checks/FmrLadder";
+import { PinMap } from "@/components/checks/PinMap";
 import { cn } from "@/lib/utils";
 import type { Finding, FindingState, ParsedListing } from "@/lib/checks/types";
 import type { Listing } from "@/lib/types";
@@ -22,9 +24,21 @@ const STATE_LABEL: Record<FindingState, string> = {
   error: "Failed",
 };
 
-// Deliberately one neutral treatment for every state. Colouring "found" green
-// would turn a lookup that merely succeeded into a reassurance.
-const CHIP = "rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-xs text-neutral-600";
+// One neutral treatment for every state. Colouring "found" green would turn a
+// lookup that merely succeeded into a reassurance.
+const CHIP =
+  "shrink-0 rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-xs text-neutral-600";
+
+const SECTION_LABEL =
+  "text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-400";
+
+function Fact({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-xs text-neutral-800">
+      {children}
+    </span>
+  );
+}
 
 interface BackgroundCheckerProps {
   onAddToMap: (listing: Listing) => void;
@@ -131,102 +145,123 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
         )}
 
         {result && listing && !loading && (
-          <div className="mt-8 space-y-4">
-            <div className="rounded-lg border border-neutral-200 bg-white p-4">
-              <h3 className="text-sm font-medium text-neutral-900">What the post says</h3>
-              <p className="mt-1 text-sm text-neutral-700">{listing.title}</p>
-              <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
-                {[
-                  ["Asking rent", listing.price ? `$${listing.price.toLocaleString()}/mo` : "—"],
-                  [
-                    "Layout",
-                    [
-                      listing.bedrooms ? `${listing.bedrooms} bd` : null,
-                      listing.bathrooms ? `${listing.bathrooms} ba` : null,
-                      listing.sqft ? `${listing.sqft.toLocaleString()} sqft` : null,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ") || "—",
-                  ],
-                  ["Address given", listing.mapAddress ?? "None published"],
-                  [
-                    "Posted",
-                    listing.postedAt
-                      ? new Date(listing.postedAt).toLocaleDateString()
-                      : "—",
-                  ],
-                  ["Photos", String(listing.photos.length)],
-                  [
-                    "Contacts in body",
-                    listing.bodyPhones.length + listing.bodyEmails.length > 0
-                      ? [...listing.bodyPhones, ...listing.bodyEmails].join(", ")
-                      : "None — replies go through Craigslist",
-                  ],
-                ].map(([label, value]) => (
-                  <div key={label} className="flex justify-between gap-3 text-xs">
-                    <dt className="shrink-0 text-neutral-500">{label}</dt>
-                    <dd className="truncate text-right text-neutral-900" title={value}>
-                      {value}
-                    </dd>
+          <div className="mt-8">
+            <section>
+              <h3 className="text-base font-medium leading-snug text-neutral-900">
+                {listing.title}
+              </h3>
+              <a
+                href={listing.url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 block truncate text-xs text-neutral-500 underline underline-offset-2 hover:text-neutral-900"
+              >
+                {listing.url}
+              </a>
+
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {listing.price !== null && <Fact>${listing.price.toLocaleString()}/mo</Fact>}
+                {listing.bedrooms !== null && <Fact>{listing.bedrooms}BR</Fact>}
+                {listing.bathrooms !== null && <Fact>{listing.bathrooms}BA</Fact>}
+                {listing.sqft !== null && <Fact>{listing.sqft.toLocaleString()} sqft</Fact>}
+                {listing.applicationFee && <Fact>{listing.applicationFee} app fee</Fact>}
+                <Fact>{listing.photos.length} photos</Fact>
+              </div>
+
+              <p className="mt-2.5 text-xs text-neutral-500">
+                {listing.mapAddress ?? "No address published"}
+                {listing.postedAt &&
+                  ` · posted ${new Date(listing.postedAt).toLocaleDateString()}`}
+                {listing.bodyPhones.length + listing.bodyEmails.length > 0
+                  ? ` · ${[...listing.bodyPhones, ...listing.bodyEmails].join(", ")}`
+                  : " · no contact in the post, replies go through Craigslist"}
+              </p>
+            </section>
+
+            <div className="mt-8 space-y-8">
+              {result.findings.map((finding) => (
+                <section key={finding.id}>
+                  <div className="flex items-center justify-between gap-3 border-b border-neutral-200 pb-2">
+                    <h4 className={SECTION_LABEL}>{finding.label}</h4>
+                    <span className={CHIP}>{STATE_LABEL[finding.state]}</span>
                   </div>
-                ))}
-              </dl>
+
+                  {finding.claim && (
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <p className={SECTION_LABEL}>The post says</p>
+                        <p className="mt-1 text-sm text-neutral-900">{finding.claim}</p>
+                      </div>
+                      <div>
+                        <p className={SECTION_LABEL}>{finding.foundLabel ?? "Records say"}</p>
+                        <p className="mt-1 text-sm text-neutral-900">{finding.found ?? "—"}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {finding.data?.kind === "fmr-ladder" && (
+                    <FmrLadder
+                      bars={finding.data.bars}
+                      listingPrice={finding.data.listingPrice}
+                      area={finding.data.area}
+                      year={finding.data.year}
+                    />
+                  )}
+                  {finding.data?.kind === "pin-map" && (
+                    <PinMap
+                      pin={finding.data.pin}
+                      geocoded={finding.data.geocoded}
+                      miles={finding.data.miles}
+                      address={finding.data.address}
+                    />
+                  )}
+
+                  {finding.note && (
+                    <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-neutral-800">
+                      {finding.note}
+                    </p>
+                  )}
+                  {finding.reason && (
+                    <p className="mt-3 text-sm text-neutral-500">{finding.reason}</p>
+                  )}
+
+                  {finding.why && (
+                    <details className="group mt-3">
+                      <summary className="cursor-pointer list-none text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-400 hover:text-neutral-700">
+                        <span className="inline-block transition-transform group-open:rotate-90">
+                          ›
+                        </span>{" "}
+                        Why this matters
+                      </summary>
+                      <p className="mt-2 border-l-2 border-neutral-200 pl-3 text-sm leading-relaxed text-neutral-600">
+                        {finding.why}
+                      </p>
+                    </details>
+                  )}
+
+                  {finding.source && (
+                    <p className="mt-3 text-[11px] text-neutral-400">
+                      Source:{" "}
+                      {finding.source.url ? (
+                        <a
+                          href={finding.source.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline underline-offset-2 hover:text-neutral-700"
+                        >
+                          {finding.source.label}
+                        </a>
+                      ) : (
+                        finding.source.label
+                      )}
+                    </p>
+                  )}
+                </section>
+              ))}
             </div>
 
-            {result.findings.map((finding) => (
-              <div key={finding.id} className="rounded-lg border border-neutral-200 bg-white p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-medium text-neutral-900">{finding.label}</h3>
-                  <span className={CHIP}>{STATE_LABEL[finding.state]}</span>
-                </div>
-
-                {finding.claim && (
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    <div className="rounded border border-neutral-100 bg-neutral-50 p-2.5">
-                      <p className="text-[11px] uppercase tracking-wide text-neutral-500">
-                        The post says
-                      </p>
-                      <p className="mt-1 text-xs text-neutral-900">{finding.claim}</p>
-                    </div>
-                    <div className="rounded border border-neutral-100 bg-neutral-50 p-2.5">
-                      <p className="text-[11px] uppercase tracking-wide text-neutral-500">
-                        {finding.foundLabel ?? "Records say"}
-                      </p>
-                      <p className="mt-1 text-xs text-neutral-900">{finding.found ?? "—"}</p>
-                    </div>
-                  </div>
-                )}
-
-                {finding.note && (
-                  <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-neutral-700">
-                    {finding.note}
-                  </p>
-                )}
-                {finding.reason && (
-                  <p className="mt-2 text-sm text-neutral-500">{finding.reason}</p>
-                )}
-                {finding.source && (
-                  <p className="mt-3 border-t border-neutral-100 pt-2 text-[11px] text-neutral-500">
-                    Source:{" "}
-                    {finding.source.url ? (
-                      <a
-                        href={finding.source.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="underline underline-offset-2"
-                      >
-                        {finding.source.label}
-                      </a>
-                    ) : (
-                      finding.source.label
-                    )}
-                  </p>
-                )}
-              </div>
-            ))}
-
             {mapListing && (
-              <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+              <div className="mt-8 flex items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-neutral-900">
                     {mapListing.title}
@@ -236,20 +271,16 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
                     {mapListing.coords ? "" : " · no location to pin"}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  disabled={added}
-                  onClick={() => onAddToMap(mapListing)}
-                >
+                <Button variant="outline" disabled={added} onClick={() => onAddToMap(mapListing)}>
                   {added ? "On the map" : "Add to map"}
                 </Button>
               </div>
             )}
 
-            <p className={cn("pt-2 text-xs text-neutral-500")}>
+            <p className={cn("mt-4 text-xs text-neutral-500")}>
               Every check above is a public-records lookup with no paid provider behind it.
-              Photo matching and identifying who is behind a phone number both need paid APIs
-              and are not wired up.
+              Photo matching, identifying who is behind a phone number, and recovering
+              Craigslist&apos;s gated contact all need paid APIs and are not wired up.
             </p>
           </div>
         )}

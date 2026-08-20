@@ -75,6 +75,9 @@ components/
   MapCanvas.tsx             mapbox-gl, dynamic ssr:false
   ListingCard.tsx
   BackgroundChecker.tsx     claim-vs-found rendering
+  checks/
+    FmrLadder.tsx           HUD bedroom ladder with the rent drawn across it
+    PinMap.tsx              Mapbox static image, both pins and the distance
   ui/                       shadcn primitives
 lib/
   types.ts                  Listing, perPersonRent
@@ -140,6 +143,16 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
   the UI does not print "Records say" over the listing's own words.
 - "Add to map" dedupes by source URL, so checking a seeded listing upgrades that
   card instead of dropping a second pin.
+
+**Result presentation**
+- Listing facts render as a chip row, findings as titled sections.
+- Two checks draw rather than describe. The rent check plots HUD's whole bedroom
+  ladder with the asking rent as a line across it, so a rent below every bar in
+  the area reads before the sentence does. The pin check shows both points on
+  one static map with the distance stated on it.
+- Every finding carries a `why` explaining the pattern it looks for, collapsed
+  behind "Why this matters". It explains the pattern, never judges the listing
+  in front of it.
 
 ### Verified against real listings
 
@@ -244,6 +257,13 @@ layout implies an independent source confirmed something. `depositLanguage` and
 `applicationFee` read the listing itself, so they either set `foundLabel` to
 something honest or omit the comparison entirely. Never let a check restate the
 post's own words under a heading that implies verification.
+
+**The pin map is a static image, not a second live map.** It is a fact to look
+at, not something to pan, and it keeps a whole `mapbox-gl` instance out of the
+checker panel. Two gotchas on Mapbox's static endpoint: `padding` is only legal
+with the `auto` viewport and returns 422 alongside an explicit one, and `auto`
+zooms absurdly close when the two pins nearly coincide — so near-identical
+points get a fixed centre and zoom instead.
 
 **Base UI tab panels, and the redundant `hidden` class.** `page.tsx` sets an
 explicit `hidden` class on the inactive panel *in addition to* Base UI's own

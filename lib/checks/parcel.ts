@@ -89,6 +89,7 @@ export async function checkParcel(listing: ParsedListing): Promise<Finding> {
       claim: listing.mapAddress,
       found: attrs.situs_address ?? prefix,
       note: `Recorded parcel ${attrs.geo_id}${attrs.sub_dec ? `, ${attrs.sub_dec} subdivision` : ""}.${attrs.legal_desc ? ` Legal description: ${attrs.legal_desc}.` : ""}`,
+      why: "Every property that exists appears on the county tax roll with its own parcel number. Matching one confirms the address is a real place somebody owns — it says nothing about whether the poster is that owner, or has any right to rent it.",
     };
   } catch {
     return { ...base, state: "error", reason: "Could not reach the county records server." };

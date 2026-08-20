@@ -19,6 +19,9 @@ const FEE_IN_BODY =
 
 const PER_PERSON = /\b(per person|per adult|each adult|per applicant|\/\s*person|each)\b/i;
 
+const WHY =
+  "Fee churning is collecting application fees from a queue of people with no intention of leasing to any of them. A single post can never show that — the pattern only appears across many listings from one poster over time. What matters here is knowing exactly what applying costs, and that it is usually gone whether or not you get the unit.";
+
 const dollars = (n: number) => `$${n.toLocaleString()}`;
 
 export function checkApplicationFee(listing: ParsedListing): Finding {
@@ -59,6 +62,7 @@ export function checkApplicationFee(listing: ParsedListing): Finding {
       ...base,
       state: "not-found",
       note: "The post does not publish an application fee. That does not mean there is none — ask what it costs to apply, and whether it is refundable, before you fill anything in.",
+      why: WHY,
     };
   }
 
@@ -94,6 +98,7 @@ export function checkApplicationFee(listing: ParsedListing): Finding {
       ...base,
       state: "found",
       note: `The post lists an application fee of ${quoted}. ${parts.join(" ")}`,
+      why: WHY,
     };
   }
 
@@ -106,5 +111,6 @@ export function checkApplicationFee(listing: ParsedListing): Finding {
     foundLabel: "Which works out to",
     found: reading,
     note: parts.join(" "),
+    why: WHY,
   };
 }
