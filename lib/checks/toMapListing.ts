@@ -14,8 +14,13 @@ export function toMapListing(result: InvestigationResult): Listing | null {
 
   const point = geocoded ?? listing.pin;
 
+  // Pasted text has no URL, so identity falls back to what the listing says it
+  // is. Two pastes of the same post then still land on one pin.
+  const identity =
+    listing.url || `pasted:${listing.title ?? ""}|${listing.mapAddress ?? ""}`;
+
   return {
-    id: `cl-${Buffer.from(listing.url).toString("base64url").slice(0, 16)}`,
+    id: `cl-${Buffer.from(identity).toString("base64url").slice(0, 16)}`,
     title: listing.title ?? "Craigslist listing",
     bodyPrice: listing.price,
     bedrooms: listing.bedrooms ?? 1,
@@ -23,7 +28,7 @@ export function toMapListing(result: InvestigationResult): Listing | null {
     address: listing.mapAddress,
     addressStatus: listing.mapAddress ? "published" : "on-request",
     coords: point ? [point.lng, point.lat] : null,
-    sourceUrl: listing.url,
+    sourceUrl: identity,
     verified: true,
   };
 }

@@ -92,6 +92,8 @@ lib/
     depositLanguage.ts      payment-language patterns in the body
     applicationFee.ts       fee amount and household total
     license.ts              Texas real estate licence register (TREC)
+    parseWithClaude.ts      reads non-Craigslist listings and pasted text
+    safeFetch.ts            SSRF-guarded outbound fetch, HTML to text
     areaCode.ts             offline area-code region tagging
     investigate.ts          runs the checks concurrently
     toMapListing.ts         investigation -> map listing
@@ -160,6 +162,17 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
   behind "Why this matters". It explains the pattern, never judges the listing
   in front of it.
 
+**Beyond Craigslist**
+- The checker takes a link from any site, or the listing text pasted straight in.
+- Craigslist keeps its free regex parser. Everything else goes to Claude with a
+  Zod schema pinned via `output_config.format`, then through the same checks.
+- Paste-the-text exists because the big sites are walled. Measured: Zillow,
+  Apartments.com, Trulia, and HotPads all return **403** to a plain fetch,
+  Realtor.com 429, Facebook 400. PadMapper and Zumper serve HTML fine. A copy
+  and paste has no bot wall to hit.
+- Needs `ANTHROPIC_API_KEY`; without it those paths report why and Craigslist
+  is unaffected.
+
 ### Verified against real listings
 
 - Parse works on all three seed posts.
@@ -211,6 +224,7 @@ the UI says so.
 | Photo reuse matching | SerpApi (~$75/mo) or our own hash index |
 | Who a phone number belongs to | paid provider |
 | Craigslist's gated reply contact | Bright Data or similar; captcha-gated |
+| Photo provenance | reverse image search is an index, which no model has — SerpApi, or our own hash index once listings persist |
 | Person research beyond the licence register | a paid provider, or one bounded Claude call with web search (~$0.05–0.10 each) |
 | UT Dallas | a second county adapter behind `parcel.ts` |
 
@@ -235,6 +249,11 @@ cp .env.local.example .env.local   # then fill in the tokens
 npm install
 npm run dev
 ```
+
+`ANTHROPIC_API_KEY` is needed only to read listings from outside Craigslist.
+`ANTHROPIC_MODEL` overrides the default `claude-opus-5` — a parse runs roughly
+10-15K tokens, so Haiku or Sonnet cut the per-listing cost several-fold if that
+matters more than accuracy.
 
 `NEXT_PUBLIC_MAPBOX_TOKEN` is required or the map shows a placeholder.
 `HUD_API_TOKEN` is free from huduser.gov; without it the rent check reports
@@ -275,6 +294,22 @@ checker panel. Two gotchas on Mapbox's static endpoint: `padding` is only legal
 with the `auto` viewport and returns 422 alongside an explicit one, and `auto`
 zooms absurdly close when the two pins nearly coincide — so near-identical
 points get a fixed centre and zoom instead.
+
+**The investigate endpoint fetches user-supplied URLs, so it resolves the host
+first.** `safeFetch.ts` looks the hostname up and rejects loopback, private,
+link-local, and CGNAT addresses before any request goes out, follows redirects
+manually so a hop cannot land somewhere private after the check, and refuses
+non-http schemes. Without that, pasting `http://169.254.169.254/` would have
+us fetching cloud metadata from inside our own network and handing it back.
+
+**Claude reads listings; it never judges them.** `parseWithClaude.ts` turns a
+page or pasted text into `ParsedListing` and stops there. Every finding still
+comes from a public record. The model is a parser for sites we have not written
+a parser for — it does not decide whether anything is a scam, and it does not
+extract photo URLs, since a plausible-looking wrong URL is exactly the error
+nobody would catch. The response schema is pinned with structured outputs
+rather than requested in the prompt, which is the direct lesson from the Autumn
+run inventing its own fields despite an explicit list.
 
 **Contact lookups only ever use a name the poster published.** `license.ts`
 reads `contactName`/`contactOrg` straight out of the post body and asks one

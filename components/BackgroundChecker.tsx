@@ -15,7 +15,10 @@ interface InvestigationResponse {
   listing: ParsedListing;
   findings: Finding[];
   mapListing: Listing | null;
+  readBy: "craigslist-parser" | "claude";
 }
+
+type Mode = "url" | "text";
 
 const STATE_LABEL: Record<FindingState, string> = {
   found: "Checked",
@@ -46,7 +49,9 @@ interface BackgroundCheckerProps {
 }
 
 export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundCheckerProps) {
+  const [mode, setMode] = useState<Mode>("url");
   const [url, setUrl] = useState("");
+  const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<InvestigationResponse | null>(null);
@@ -55,16 +60,28 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
   const added = mapListing !== null && verifiedUrls.includes(mapListing.sourceUrl);
 
   async function runCheck() {
-    const trimmed = url.trim();
-    if (trimmed === "") {
-      setError("Paste a listing link first.");
-      return;
-    }
-    try {
-      new URL(trimmed);
-    } catch {
-      setError("That does not look like a link. Include the full URL.");
-      return;
+    let payload: { url?: string; text?: string };
+
+    if (mode === "url") {
+      const trimmed = url.trim();
+      if (trimmed === "") {
+        setError("Paste a listing link first.");
+        return;
+      }
+      try {
+        new URL(trimmed);
+      } catch {
+        setError("That does not look like a link. Include the full URL.");
+        return;
+      }
+      payload = { url: trimmed };
+    } else {
+      const trimmed = text.trim();
+      if (trimmed.length < 40) {
+        setError("Paste the whole listing — that is too short to read.");
+        return;
+      }
+      payload = { text: trimmed };
     }
 
     setError(null);
@@ -74,7 +91,7 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
       const response = await fetch("/api/investigate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: trimmed }),
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -96,29 +113,83 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
       <div className="mx-auto w-full max-w-2xl px-6 py-10">
         <h2 className="text-lg font-medium text-neutral-900">Check a listing</h2>
         <p className="mt-1 text-sm text-neutral-600">
-          Paste a Craigslist link. We look up what we can independently and show it next to
+          Paste a link, or the listing text if the site blocks us. We look up what we can independently and show it next to
           what the post claims. We do not score listings — the disagreements are the point.
         </p>
 
-        <div className="mt-5 flex gap-2">
-          <Input
-            value={url}
-            onChange={(event) => {
-              setUrl(event.target.value);
-              if (error) setError(null);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !loading) runCheck();
-            }}
-            placeholder="https://www.craigslist.org/view/d/..."
-            aria-label="Listing URL"
-            aria-invalid={error !== null}
-            disabled={loading}
-          />
-          <Button onClick={runCheck} disabled={loading}>
-            {loading ? "Checking…" : "Check listing"}
-          </Button>
+        <div className="mt-5 flex gap-4 border-b border-neutral-200">
+          {(
+            [
+              ["url", "Paste a link"],
+              ["text", "Paste the listing text"],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => {
+                setMode(value);
+                setError(null);
+              }}
+              aria-pressed={mode === value}
+              className={cn(
+                "-mb-px border-b-2 pb-2 text-sm transition-colors",
+                mode === value
+                  ? "border-neutral-900 font-medium text-neutral-900"
+                  : "border-transparent text-neutral-500 hover:text-neutral-800",
+              )}
+            >
+              {label}
+            </button>
+          ))}
         </div>
+
+        {mode === "url" ? (
+          <div className="mt-4 flex gap-2">
+            <Input
+              value={url}
+              onChange={(event) => {
+                setUrl(event.target.value);
+                if (error) setError(null);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !loading) runCheck();
+              }}
+              placeholder="https://www.craigslist.org/view/d/..."
+              aria-label="Listing URL"
+              aria-invalid={error !== null}
+              disabled={loading}
+            />
+            <Button onClick={runCheck} disabled={loading}>
+              {loading ? "Checking…" : "Check listing"}
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <textarea
+              value={text}
+              onChange={(event) => {
+                setText(event.target.value);
+                if (error) setError(null);
+              }}
+              placeholder="Copy the whole post — rent, address, description, contact — and paste it here."
+              aria-label="Listing text"
+              aria-invalid={error !== null}
+              disabled={loading}
+              rows={7}
+              className="w-full rounded-md border border-neutral-200 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:border-neutral-400 focus-visible:outline-none disabled:opacity-60"
+            />
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <p className="text-xs text-neutral-500">
+                For sites that block automated readers — Zillow, Facebook Marketplace,
+                Apartments.com.
+              </p>
+              <Button onClick={runCheck} disabled={loading}>
+                {loading ? "Checking…" : "Check listing"}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
 
@@ -150,14 +221,18 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
               <h3 className="text-base font-medium leading-snug text-neutral-900">
                 {listing.title}
               </h3>
-              <a
-                href={listing.url}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-1 block truncate text-xs text-neutral-500 underline underline-offset-2 hover:text-neutral-900"
-              >
-                {listing.url}
-              </a>
+              {listing.url ? (
+                <a
+                  href={listing.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 block truncate text-xs text-neutral-500 underline underline-offset-2 hover:text-neutral-900"
+                >
+                  {listing.url}
+                </a>
+              ) : (
+                <p className="mt-1 text-xs text-neutral-500">Read from pasted text</p>
+              )}
 
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {listing.price !== null && <Fact>${listing.price.toLocaleString()}/mo</Fact>}
@@ -278,9 +353,16 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
             )}
 
             <p className={cn("mt-4 text-xs text-neutral-500")}>
-              Every check above is a public-records lookup with no paid provider behind it.
-              Photo matching, identifying who is behind a phone number, and recovering
-              Craigslist&apos;s gated contact all need paid APIs and are not wired up.
+              {result.readBy === "claude" && (
+                <>
+                  The listing details were read by a language model rather than a parser,
+                  so check them against the original before relying on them. Every finding
+                  below that is a public-records lookup against those details.{" "}
+                </>
+              )}
+              The checks themselves use no paid provider. Photo matching, identifying who
+              is behind a phone number, and recovering Craigslist&apos;s gated contact all
+              need paid APIs and are not wired up.
             </p>
           </div>
         )}
