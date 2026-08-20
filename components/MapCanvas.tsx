@@ -1,14 +1,68 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import type { Listing } from "@/lib/types";
+import type { Coords, Listing } from "@/lib/types";
+import { CAMPUS } from "@/lib/campus";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 // UT Austin, used only when no listing has coordinates yet.
 const FALLBACK_CENTER: [number, number] = [-97.7431, 30.2849];
+
+const CAMPUS_SOURCE = "campus";
+const WALK_SOURCE = "walk-route";
+const ORANGE = "#ea580c";
+
+const EMPTY = { type: "FeatureCollection", features: [] } as const;
+
+/**
+ * Campus outline and the walking path.
+ *
+ * Both are style layers rather than DOM markers, so unlike the price pins these
+ * genuinely cannot be added until the style has loaded — there is nothing to
+ * attach them to before that.
+ */
+function addCampusLayers(map: mapboxgl.Map) {
+  if (!map.getSource(CAMPUS_SOURCE)) {
+    map.addSource(CAMPUS_SOURCE, {
+      type: "geojson",
+      data: {
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Polygon", coordinates: [CAMPUS.outline as unknown as number[][]] },
+      },
+    });
+    map.addLayer({
+      id: "campus-fill",
+      type: "fill",
+      source: CAMPUS_SOURCE,
+      paint: { "fill-color": ORANGE, "fill-opacity": 0.15 },
+    });
+    map.addLayer({
+      id: "campus-outline",
+      type: "line",
+      source: CAMPUS_SOURCE,
+      paint: { "line-color": ORANGE, "line-width": 1.5, "line-opacity": 0.8 },
+    });
+  }
+
+  if (!map.getSource(WALK_SOURCE)) {
+    map.addSource(WALK_SOURCE, { type: "geojson", data: EMPTY });
+    map.addLayer({
+      id: "walk-line",
+      type: "line",
+      source: WALK_SOURCE,
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": ORANGE,
+        "line-width": 3,
+        "line-dasharray": [1.5, 1.5],
+      },
+    });
+  }
+}
 
 interface MapCanvasProps {
   listings: Listing[];
@@ -16,6 +70,8 @@ interface MapCanvasProps {
   onSelect: (id: string) => void;
   /** False while the map sits inside a hidden tab panel. */
   active: boolean;
+  /** Walking path from the selected listing to campus, when we have one. */
+  walkPath: Coords[] | null;
 }
 
 export default function MapCanvas({
@@ -23,11 +79,13 @@ export default function MapCanvas({
   selectedId,
   onSelect,
   active,
+  walkPath,
 }: MapCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const onSelectRef = useRef(onSelect);
+  const [styleReady, setStyleReady] = useState(false);
 
   // Kept in a ref so marker click handlers, attached once to raw DOM nodes,
   // always call the latest callback without rebuilding every marker.
@@ -51,7 +109,12 @@ export default function MapCanvas({
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
     // If the panel was hidden at mount the canvas measured 0x0, so re-measure
     // once the style settles rather than depending on which tab opened first.
-    map.on("load", () => map.resize());
+    map.on("load", () => {
+      map.resize();
+      // Markers can be added any time, but layers need a style to attach to.
+      addCampusLayers(map);
+      setStyleReady(true);
+    });
     mapRef.current = map;
 
     return () => {
@@ -130,6 +193,26 @@ export default function MapCanvas({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, listings]);
+
+  // Redraw the dashed walking path whenever the selection changes. Cleared to
+  // an empty collection rather than removed, so the layer keeps its place in
+  // the stack instead of being torn down and re-added.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !styleReady) return;
+    const source = map.getSource(WALK_SOURCE) as mapboxgl.GeoJSONSource | undefined;
+    if (!source) return;
+
+    source.setData(
+      walkPath && walkPath.length > 1
+        ? {
+            type: "Feature",
+            properties: {},
+            geometry: { type: "LineString", coordinates: walkPath as unknown as number[][] },
+          }
+        : EMPTY,
+    );
+  }, [walkPath, styleReady]);
 
   // The panel stays mounted while hidden so the map is not torn down on every
   // tab switch, but a map sized inside a hidden element measures 0x0.

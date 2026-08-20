@@ -76,6 +76,7 @@ components/
   ListingCard.tsx
   BackgroundChecker.tsx     claim-vs-found rendering
   PhotoStrip.tsx            listing photos, lead image plus thumbnails
+  GroupSizePicker.tsx       how many people are splitting the rent
   checks/
     FmrLadder.tsx           HUD bedroom ladder with the rent drawn across it
     PinMap.tsx              Mapbox static image, both pins and the distance
@@ -85,6 +86,8 @@ lib/
   seedListings.ts           three real Austin Craigslist posts
   geocode.ts                Mapbox forward geocoding
   photos.ts                 Craigslist photo size variants
+  campus.ts                 UT Austin outline and walking destination
+  walk.ts                   Mapbox walking route to campus, cached
   checks/
     types.ts                Finding, ParsedListing, Investigation
     parseListing.ts         fetch + parse a Craigslist post
@@ -164,6 +167,30 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
 - This is only *displaying* the photos. Nothing checks whether they belong to
   the property — that needs a reverse-image index, which stays paid.
 
+**Distance to campus**
+- Every placed listing shows its walking time and distance to campus. Selecting
+  one draws the real walking path as a dashed orange line, with the campus
+  outlined and filled in the same orange.
+- Directions rather than the Matrix API, even though Matrix would fetch every
+  listing at once: the two disagree by a couple of minutes on the same pair, and
+  a card reading "18 min" beside a line drawn as a 20-minute route is the kind
+  of small lie that costs trust. One cached call per listing keeps the number
+  and the drawn path the same thing.
+- Walking only for now. Bikes and cars are the same endpoint with a different
+  profile.
+- The campus outline is hand-drawn and approximate — OpenStreetMap has the real
+  boundary but its API is unreachable from here. It says "campus is over here",
+  not where the property line runs. Walking times measure to the Tower.
+- Real figures: Dean Keeton is 20 min / 1.0 mi, 45th and Speedway 36 min /
+  1.9 mi.
+
+**Rent split**
+- One group-size control for the whole sidebar, not per listing — a student
+  searches as a group, and this is the value a real group replaces later.
+- Deliberately independent of bedroom count. Students share rooms, and the
+  question is "what do I pay", not "what does a bedroom cost".
+- Cards show total next to your share once the group is bigger than one.
+
 **Result presentation**
 - Listing facts render as a chip row, findings as titled sections.
 - Two checks draw rather than describe. The rent check plots HUD's whole bedroom
@@ -241,22 +268,19 @@ the UI says so.
 
 **P1 — a judge notices these missing**
 
-4. **Distance to campus.** The first question a student asks, ahead of any
-   check we run. Both coordinates are already known; Mapbox directions is
-   free-tier. Walk and bike time, and a filter on it.
-5. **Rent split by group size.** Half-built — cards show "$513 each with 2
-   people" but key off bedroom count. Point it at a group and it is done.
-
 **P2 — the named demo features**
 
-6. **Tour scheduling.** Needs auth.
-7. **Group invites and shared shortlists.** Needs auth. The largest build here.
+4. **Tour scheduling.** Needs auth.
+5. **Group invites and shared shortlists.** Needs auth. The largest build here.
+   The group-size control is the seam it plugs into.
 
 **P3 — rounds it out**
 
-8. Search and filters: price, bedrooms, distance.
-9. "Where are you going to school?" landing page.
-10. Saved listings / shortlist.
+6. Search and filters: price, bedrooms, walking time.
+7. "Where are you going to school?" landing page. The campus outline and
+   walking destination are already isolated in `campus.ts` for this.
+8. Saved listings / shortlist.
+9. Bike and car travel times — same endpoint, different profile.
 
 **Blocked on money**
 

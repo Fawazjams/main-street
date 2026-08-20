@@ -5,16 +5,27 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { perPersonRent, type Listing } from "@/lib/types";
 import { photoAt } from "@/lib/photos";
+import type { WalkRoute } from "@/lib/walk";
 
 interface ListingCardProps {
   listing: Listing;
   selected: boolean;
   onSelect: (id: string) => void;
+  /** How many people are splitting the rent. */
+  groupSize: number;
+  /** Walk to campus, once it has been fetched. */
+  walk: WalkRoute | null;
 }
 
-export function ListingCard({ listing, selected, onSelect }: ListingCardProps) {
+export function ListingCard({
+  listing,
+  selected,
+  onSelect,
+  groupSize,
+  walk,
+}: ListingCardProps) {
   const placed = listing.coords !== null;
-  const split = listing.bedrooms > 1 ? perPersonRent(listing, listing.bedrooms) : null;
+  const share = perPersonRent(listing, groupSize);
 
   return (
     <button
@@ -59,9 +70,24 @@ export function ListingCard({ listing, selected, onSelect }: ListingCardProps) {
             : "No address posted")}
       </p>
 
-      {split !== null && (
-        <p className="mt-1 text-xs text-neutral-500">
-          ${split.toLocaleString()} each with {listing.bedrooms} people
+      {groupSize > 1 && (
+        <p className="mt-1.5 text-xs text-neutral-600">
+          <span className="text-neutral-500">Total ${listing.bodyPrice.toLocaleString()}</span>
+          {" · "}
+          <span className="font-medium text-neutral-900">
+            you pay ${share.toLocaleString()}
+          </span>
+        </p>
+      )}
+
+      {walk && (
+        <p className="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-600">
+          <span
+            aria-hidden="true"
+            className="inline-block h-1.5 w-1.5 rounded-full bg-orange-600"
+          />
+          {walk.minutes} min walk to campus
+          <span className="text-neutral-400">({walk.miles.toFixed(1)} mi)</span>
         </p>
       )}
 
