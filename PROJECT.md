@@ -212,6 +212,60 @@ the UI says so.
 - **Area-code region.** None of the three seed listings publish a phone number,
   so that branch has never fired.
 
+### What is missing, in priority order
+
+**P0 — the core claim does not hold without these**
+
+1. **Store findings with the listing.** A mapped listing keeps ten fields and a
+   `verified` flag; all seven check results are discarded. "The second student
+   gets the first student's findings" is currently false. Design the Supabase
+   schema around an `investigations` table keyed to the listing, not just
+   `listings` — otherwise the gap gets baked in.
+2. **Listing detail view.** Nowhere shows a listing's findings from the map.
+   Clicking a pin flies the camera and nothing else. This screen is also where
+   tours, saving, and group sharing attach — it turns three features into one.
+3. **Supabase persistence + auth.** Listings are in memory and reset on reload.
+   Auth is the prerequisite for tours and groups, so it comes first.
+
+**P1 — a judge notices these missing**
+
+4. **Photos.** Parsed already (9 and 16 on the seed listings), never displayed.
+   A housing product made of text cards reads as unfinished on sight.
+5. **Distance to campus.** The first question a student asks, ahead of any
+   check we run. Both coordinates are already known; Mapbox directions is
+   free-tier. Walk and bike time, and a filter on it.
+6. **Rent split by group size.** Half-built — cards show "$513 each with 2
+   people" but key off bedroom count. Point it at a group and it is done.
+
+**P2 — the named demo features**
+
+7. **Tour scheduling.** Needs auth.
+8. **Group invites and shared shortlists.** Needs auth. The largest build here.
+
+**P3 — rounds it out**
+
+9. Search and filters: price, bedrooms, distance.
+10. "Where are you going to school?" landing page.
+11. Saved listings / shortlist.
+
+**Blocked on money**
+
+- Photo reverse search — an index, not intelligence. SerpApi ~$75/mo.
+- Who a phone number belongs to.
+- Craigslist's gated reply contact — captcha, needs a paid browser.
+
+**Unlocked by persistence, not money**
+
+- Fee-churn detection: the same poster or phone collecting fees across many
+  listings only becomes visible once a corpus accumulates.
+- Photo reuse by perceptual hash across our own corpus.
+
+**Known gaps in what already exists**
+
+- The deposit-language check has never fired on a real scam listing, only on
+  synthetic text. A genuine one is worth capturing as a fixture.
+- UT Dallas needs a second county adapter behind `parcel.ts`.
+
 ### Not built
 
 | | Needs |
