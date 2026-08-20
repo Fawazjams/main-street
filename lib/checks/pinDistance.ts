@@ -1,4 +1,3 @@
-import { geocode } from "@/lib/geocode";
 import type { Finding, ParsedListing } from "./types";
 
 /**
@@ -33,6 +32,8 @@ export interface PinDistanceResult {
 
 export async function checkPinDistance(
   listing: ParsedListing,
+  /** Where the stated address resolves to, resolved once by the caller. */
+  coords: { lat: number; lng: number } | null,
 ): Promise<PinDistanceResult> {
   const base: Finding = {
     id: "pin-distance",
@@ -55,7 +56,6 @@ export async function checkPinDistance(
     };
   }
 
-  const coords = await geocode(`${listing.mapAddress}, Austin, TX`);
   if (!coords) {
     return {
       finding: {
@@ -68,7 +68,7 @@ export async function checkPinDistance(
     };
   }
 
-  const geocoded = { lng: coords[0], lat: coords[1] };
+  const geocoded = coords;
   const miles = milesBetween(listing.pin, geocoded);
   const distance =
     miles < 0.1

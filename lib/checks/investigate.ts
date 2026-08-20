@@ -30,6 +30,18 @@ const isCraigslist = (url: string) => {
   }
 };
 
+/**
+ * Craigslist prints a bare street address like "926 E. Dean Keeton" with no
+ * city, so the campus has to be supplied. A pasted listing usually carries the
+ * full address already. The Austin default is the demo assumption to revisit
+ * when the school picker lands.
+ */
+async function geocodeAddress(address: string) {
+  const query = address.includes(",") ? address : `${address}, Austin, TX`;
+  const coords = await geocode(query);
+  return coords ? { lng: coords[0], lat: coords[1] } : null;
+}
+
 async function read(
   input: InvestigationInput,
 ): Promise<{ listing: ParsedListing; readBy: InvestigationResult["readBy"] }> {
@@ -65,10 +77,16 @@ export async function investigate(
 ): Promise<InvestigationResult> {
   const { listing, readBy } = await read(input);
 
+  // Resolved once, up front. Two checks need a coordinate and a pasted listing
+  // has no pin at all, so geocoding inside the pin check left the rent
+  // benchmark with nothing to work from.
+  const geocoded = listing.mapAddress ? await geocodeAddress(listing.mapAddress) : null;
+  const point = listing.pin ?? geocoded;
+
   const [parcel, pin, market, license] = await Promise.all([
     checkParcel(listing),
-    checkPinDistance(listing),
-    checkMarketRent(listing),
+    checkPinDistance(listing, geocoded),
+    checkMarketRent(listing, point),
     checkLicense(listing),
   ]);
   // These read text we already have, so they cost nothing and cannot fail on
@@ -76,14 +94,6 @@ export async function investigate(
   const phone = checkPhoneRegion(listing);
   const deposit = checkDepositLanguage(listing);
   const fee = checkApplicationFee(listing);
-
-  // Only Craigslist gives us a pin to compare against, so the distance check is
-  // the only thing that geocodes. Everything else still deserves a map pin.
-  let geocoded = pin.geocoded;
-  if (!geocoded && listing.mapAddress) {
-    const coords = await geocode(listing.mapAddress);
-    if (coords) geocoded = { lng: coords[0], lat: coords[1] };
-  }
 
   return {
     url: listing.url,

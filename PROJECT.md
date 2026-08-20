@@ -251,9 +251,12 @@ npm run dev
 ```
 
 `ANTHROPIC_API_KEY` is needed only to read listings from outside Craigslist.
-`ANTHROPIC_MODEL` overrides the default `claude-opus-5` — a parse runs roughly
-10-15K tokens, so Haiku or Sonnet cut the per-listing cost several-fold if that
-matters more than accuracy.
+Nothing else in the app calls a model, so a Craigslist-only demo spends nothing.
+`ANTHROPIC_MODEL` overrides the default `claude-haiku-4-5`.
+
+Measured, not estimated: a pasted listing is **1,223 in / 236 out** on Haiku,
+about **£0.002** — roughly 10,000 pastes per $25. A full web page is bigger,
+capped at 40K characters (~10K tokens), so about 1.2 cents each.
 
 `NEXT_PUBLIC_MAPBOX_TOKEN` is required or the map shows a placeholder.
 `HUD_API_TOKEN` is free from huduser.gov; without it the rent check reports
@@ -301,6 +304,17 @@ link-local, and CGNAT addresses before any request goes out, follows redirects
 manually so a hop cannot land somewhere private after the check, and refuses
 non-http schemes. Without that, pasting `http://169.254.169.254/` would have
 us fetching cloud metadata from inside our own network and handing it back.
+
+**Haiku is the default model, deliberately.** The schema is pinned by structured
+outputs, so the model transcribes into a fixed shape rather than reasoning —
+the task class small models are strongest at. Opus 5 also runs adaptive thinking
+by default, billing reasoning tokens at Opus output rates for a job that needs
+none. `ANTHROPIC_MODEL` overrides it when a gnarly page justifies ~5x the cost.
+
+**Parsed listings are cached by a hash of their text.** In memory for now, so it
+dies with the server. This is the seed of the cache that belongs in Supabase,
+where it stops being an optimisation and becomes the feature: the second student
+to open a listing pays nothing to read it.
 
 **Claude reads listings; it never judges them.** `parseWithClaude.ts` turns a
 page or pasted text into `ParsedListing` and stops there. Every finding still

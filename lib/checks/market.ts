@@ -65,7 +65,11 @@ function fmrForBedrooms(basicdata: unknown, bedrooms: number): number | null {
   return typeof raw !== "undefined" && raw !== null && !Number.isNaN(value) ? value : null;
 }
 
-export async function checkMarketRent(listing: ParsedListing): Promise<Finding> {
+export async function checkMarketRent(
+  listing: ParsedListing,
+  /** Map pin when there is one, otherwise the geocoded address. */
+  point: { lat: number; lng: number } | null,
+): Promise<Finding> {
   const base: Finding = {
     id: "market-rent",
     label: "Rent vs local benchmark",
@@ -84,14 +88,18 @@ export async function checkMarketRent(listing: ParsedListing): Promise<Finding> 
         "Needs a free HUD API token. Register at huduser.gov and set HUD_API_TOKEN in .env.local.",
     };
   }
-  if (!listing.pin) {
-    return { ...base, reason: "The post has no map pin, so the county is unknown." };
+  if (!point) {
+    return {
+      ...base,
+      reason:
+        "No location to work from — the post gives neither a map pin nor an address we could place.",
+    };
   }
   if (listing.price === null) {
     return { ...base, reason: "The post states no price." };
   }
 
-  const geoid = await countyGeoid(listing.pin.lat, listing.pin.lng);
+  const geoid = await countyGeoid(point.lat, point.lng);
   if (!geoid) {
     return { ...base, state: "error", reason: "Could not resolve the pin to a county." };
   }

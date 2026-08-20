@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
@@ -49,8 +50,28 @@ Rules:
 
 export const claudeConfigured = () => !!process.env.ANTHROPIC_API_KEY;
 
-/** Opus by default; drop to a cheaper model with ANTHROPIC_MODEL if wanted. */
-const model = () => process.env.ANTHROPIC_MODEL ?? "claude-opus-5";
+/**
+ * Haiku by default.
+ *
+ * The schema is already pinned by structured outputs, so the model is doing
+ * transcription against a fixed shape rather than reasoning - the task class
+ * small models are strongest at. Opus also runs adaptive thinking by default,
+ * which bills reasoning tokens at Opus output rates for a job that needs none.
+ *
+ * Override with ANTHROPIC_MODEL when accuracy on a gnarly page matters more
+ * than the roughly five-fold cost difference.
+ */
+const model = () => process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5";
+
+/**
+ * Re-reading the same listing costs nothing.
+ *
+ * In memory, so it dies with the server - this is the seed of the cache that
+ * belongs in Supabase, where it also becomes the thing that makes a shared map
+ * cheap: the second student to open a listing pays nothing to read it.
+ */
+const cache = new Map<string, ParsedListing>();
+const CACHE_MAX = 200;
 
 export async function parseWithClaude(
   source: { kind: "url"; url: string; text: string } | { kind: "text"; text: string },
@@ -61,10 +82,18 @@ export async function parseWithClaude(
     );
   }
 
+  const key = createHash("sha256").update(source.text).digest("hex");
+  const hit = cache.get(key);
+  if (hit) {
+    return { ...hit, url: source.kind === "url" ? source.url : hit.url };
+  }
+
   const client = new Anthropic();
   const response = await client.messages.parse({
     model: model(),
-    max_tokens: 4000,
+    // The reply is one small JSON object. A high ceiling here would only cap a
+    // runaway, and output tokens are the expensive half.
+    max_tokens: 1200,
     system: SYSTEM,
     messages: [
       {
@@ -74,6 +103,11 @@ export async function parseWithClaude(
     ],
     output_config: { format: zodOutputFormat(ExtractedListing) },
   });
+
+  const usage = response.usage;
+  console.log(
+    `[parseWithClaude] ${model()} in=${usage.input_tokens} out=${usage.output_tokens}`,
+  );
 
   const parsed = response.parsed_output;
   if (!parsed) {
@@ -85,7 +119,7 @@ export async function parseWithClaude(
     return only.length === 11 && only.startsWith("1") ? only.slice(1) : only;
   };
 
-  return {
+  const listing: ParsedListing = {
     url: source.kind === "url" ? source.url : "",
     title: parsed.title,
     price: parsed.price,
@@ -107,4 +141,8 @@ export async function parseWithClaude(
     contactName: parsed.contactName,
     contactOrg: parsed.contactOrg,
   };
+
+  if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value!);
+  cache.set(key, listing);
+  return listing;
 }
