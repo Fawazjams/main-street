@@ -110,6 +110,9 @@ lib/
     toMapListing.ts         investigation -> map listing
   fixtures/
     autumn-dean-keeton.json a real Autumn response, kept as reference
+scripts/
+  check-hud.mjs             pin -> county -> HUD, prints the raw payload
+  seed-db.mjs               loads the seed listings into Supabase
 ```
 
 Every check returns the same `Finding` shape, so adding one is a new file plus a
@@ -376,6 +379,12 @@ Measured, not estimated: a pasted listing is **1,223 in / 236 out** on Haiku,
 about **$0.002** — roughly 10,000 pastes per $25. A full web page is bigger,
 capped at 40K characters (~10K tokens), so about 1.2 cents each.
 
+Supabase is live on the `mainstreet` project. Without
+`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` the map falls
+back to the seed listings, says "not saved yet", and nothing persists. Use the
+publishable key, never `service_role`. On a fresh project, apply the two tables
+and their policies, then `npm run db:seed`.
+
 `NEXT_PUBLIC_MAPBOX_TOKEN` is required or the map shows a placeholder.
 `HUD_API_TOKEN` is free from huduser.gov; without it the rent check reports
 itself as not run. Both are set. Next reads env files only at boot, so restart
@@ -384,6 +393,7 @@ the dev server after changing them.
 ```bash
 npm run lint && npm run build   # build is the real check on the mapbox SSR import
 npm run check:hud               # pin -> county -> rent, prints HUD's raw payload
+npm run db:seed                 # load the seed listings; safe to re-run
 ```
 
 HUD's own docs show rents as strings ("948.0"); the live API returns numbers.
