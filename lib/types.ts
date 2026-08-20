@@ -22,6 +22,8 @@ export interface Listing {
   neighborhood?: string;
   /** null when the posting never published a location. The map skips these. */
   coords: Coords | null;
+  /** Listing photo URLs at Craigslist's 600x450 size. Resize with photoAt(). */
+  photos: string[];
   sourceUrl: string;
   /** True once the listing has been through the background checker. */
   verified: boolean;

@@ -18,6 +18,14 @@ export const seedListings: Listing[] = [
     addressStatus: "published",
     neighborhood: "North campus",
     coords: [-97.72693, 30.28781],
+    photos: [
+      "https://images.craigslist.org/00B0B_9HcUQRwUYs0_0ne0hq_600x450.jpg",
+      "https://images.craigslist.org/00909_ijMsyMR6wTq_0ms0gQ_600x450.jpg",
+      "https://images.craigslist.org/00Z0Z_g58uLWzxK7z_0ne0hq_600x450.jpg",
+      "https://images.craigslist.org/00606_gnUzKFcPfId_0d40hq_600x450.jpg",
+      "https://images.craigslist.org/00F0F_2od1qZ25FTp_0d40hq_600x450.jpg",
+      "https://images.craigslist.org/00M0M_4XayE2SPikR_0d40hq_600x450.jpg",
+    ],
     sourceUrl:
       "https://www.craigslist.org/view/d/austin-furnished-one-bedroom-across/oiMsh2XL43E1XXAmCAADui",
     verified: false,
@@ -36,6 +44,14 @@ export const seedListings: Listing[] = [
     addressStatus: "published",
     neighborhood: "North campus",
     coords: [-97.72841, 30.30866],
+    photos: [
+      "https://images.craigslist.org/00U0U_b216UAZ8Kjj_0j40kE_600x450.jpg",
+      "https://images.craigslist.org/01616_9bC7Xx8PVla_05E04e_600x450.jpg",
+      "https://images.craigslist.org/00X0X_l12JN3ozEQf_0lM0t2_600x450.jpg",
+      "https://images.craigslist.org/00W0W_icRoUOPGSQ_07K0ak_600x450.jpg",
+      "https://images.craigslist.org/00d0d_6T2A83zQ74W_07K0ak_600x450.jpg",
+      "https://images.craigslist.org/00C0C_d2VTW2PXXg2_07K0ak_600x450.jpg",
+    ],
     sourceUrl:
       "https://www.craigslist.org/view/d/austin-best-two-bedroom-bargain-in-the/s77LsMtYuErRrMtQot4qMz",
     verified: false,
@@ -51,6 +67,9 @@ export const seedListings: Listing[] = [
     address: null,
     addressStatus: "on-request",
     coords: null,
+    photos: [
+      "https://images.craigslist.org/00j0j_cMSyeoojgQ1_04w03A_600x450.jpg",
+    ],
     sourceUrl:
       "https://www.craigslist.org/view/d/austin-remodeled-interior-refinished/mSno6h8YWaYTbSCqU3MRPB",
     verified: false,

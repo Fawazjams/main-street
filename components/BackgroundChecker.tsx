@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FmrLadder } from "@/components/checks/FmrLadder";
 import { PinMap } from "@/components/checks/PinMap";
+import { PhotoStrip } from "@/components/PhotoStrip";
 import { cn } from "@/lib/utils";
 import type { Finding, FindingState, ParsedListing } from "@/lib/checks/types";
 import type { Listing } from "@/lib/types";
@@ -232,6 +233,12 @@ export function BackgroundChecker({ onAddToMap, verifiedUrls }: BackgroundChecke
                 </a>
               ) : (
                 <p className="mt-1 text-xs text-neutral-500">Read from pasted text</p>
+              )}
+
+              {listing.photos.length > 0 && (
+                <div className="mt-3">
+                  <PhotoStrip photos={listing.photos} title={listing.title} />
+                </div>
               )}
 
               <div className="mt-3 flex flex-wrap gap-1.5">

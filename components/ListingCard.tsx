@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { perPersonRent, type Listing } from "@/lib/types";
+import { photoAt } from "@/lib/photos";
 
 interface ListingCardProps {
   listing: Listing;
@@ -20,12 +22,24 @@ export function ListingCard({ listing, selected, onSelect }: ListingCardProps) {
       onClick={() => onSelect(listing.id)}
       aria-pressed={selected}
       className={cn(
-        "w-full rounded-lg border p-4 text-left transition-colors",
+        "w-full overflow-hidden rounded-lg border text-left transition-colors",
         selected
           ? "border-neutral-900 bg-neutral-50"
           : "border-neutral-200 bg-white hover:border-neutral-400",
       )}
     >
+      {listing.photos.length > 0 && (
+        <Image
+          src={photoAt(listing.photos[0], "300x300")}
+          alt=""
+          width={300}
+          height={300}
+          className="h-28 w-full object-cover"
+          unoptimized
+        />
+      )}
+
+      <div className="p-4">
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-base font-medium text-neutral-900">
           ${listing.bodyPrice.toLocaleString()}
@@ -68,6 +82,7 @@ export function ListingCard({ listing, selected, onSelect }: ListingCardProps) {
             Title says ${listing.titlePrice.toLocaleString()}
           </Badge>
         )}
+      </div>
       </div>
     </button>
   );

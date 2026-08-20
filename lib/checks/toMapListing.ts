@@ -28,6 +28,7 @@ export function toMapListing(result: InvestigationResult): Listing | null {
     address: listing.mapAddress,
     addressStatus: listing.mapAddress ? "published" : "on-request",
     coords: point ? [point.lng, point.lat] : null,
+    photos: listing.photos,
     sourceUrl: identity,
     verified: true,
   };

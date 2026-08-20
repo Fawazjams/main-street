@@ -75,6 +75,7 @@ components/
   MapCanvas.tsx             mapbox-gl, dynamic ssr:false
   ListingCard.tsx
   BackgroundChecker.tsx     claim-vs-found rendering
+  PhotoStrip.tsx            listing photos, lead image plus thumbnails
   checks/
     FmrLadder.tsx           HUD bedroom ladder with the rent drawn across it
     PinMap.tsx              Mapbox static image, both pins and the distance
@@ -83,6 +84,7 @@ lib/
   types.ts                  Listing, perPersonRent
   seedListings.ts           three real Austin Craigslist posts
   geocode.ts                Mapbox forward geocoding
+  photos.ts                 Craigslist photo size variants
   checks/
     types.ts                Finding, ParsedListing, Investigation
     parseListing.ts         fetch + parse a Craigslist post
@@ -151,6 +153,16 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
   the UI does not print "Records say" over the listing's own words.
 - "Add to map" dedupes by source URL, so checking a seeded listing upgrades that
   card instead of dropping a second pin.
+
+**Photos**
+- Craigslist's CDN has no hotlink protection — verified 200 `image/jpeg` with a
+  foreign referer — so listing photos render directly, no proxy or re-hosting.
+- Three sizes exist on the same URL: 300x300, 600x450, 1200x900. `photoAt()`
+  swaps the suffix so a card thumbnail costs ~7KB instead of 75KB. No 50x50.
+- Sidebar cards show a thumbnail; the checker shows a lead image with a
+  thumbnail strip, each linking to the full size.
+- This is only *displaying* the photos. Nothing checks whether they belong to
+  the property — that needs a reverse-image index, which stays paid.
 
 **Result presentation**
 - Listing facts render as a chip row, findings as titled sections.
@@ -229,24 +241,22 @@ the UI says so.
 
 **P1 — a judge notices these missing**
 
-4. **Photos.** Parsed already (9 and 16 on the seed listings), never displayed.
-   A housing product made of text cards reads as unfinished on sight.
-5. **Distance to campus.** The first question a student asks, ahead of any
+4. **Distance to campus.** The first question a student asks, ahead of any
    check we run. Both coordinates are already known; Mapbox directions is
    free-tier. Walk and bike time, and a filter on it.
-6. **Rent split by group size.** Half-built — cards show "$513 each with 2
+5. **Rent split by group size.** Half-built — cards show "$513 each with 2
    people" but key off bedroom count. Point it at a group and it is done.
 
 **P2 — the named demo features**
 
-7. **Tour scheduling.** Needs auth.
-8. **Group invites and shared shortlists.** Needs auth. The largest build here.
+6. **Tour scheduling.** Needs auth.
+7. **Group invites and shared shortlists.** Needs auth. The largest build here.
 
 **P3 — rounds it out**
 
-9. Search and filters: price, bedrooms, distance.
-10. "Where are you going to school?" landing page.
-11. Saved listings / shortlist.
+8. Search and filters: price, bedrooms, distance.
+9. "Where are you going to school?" landing page.
+10. Saved listings / shortlist.
 
 **Blocked on money**
 
