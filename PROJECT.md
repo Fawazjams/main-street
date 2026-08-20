@@ -187,6 +187,10 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
   saved yet" note, so a fresh clone still demos.
 - `npm run db:seed` loads the three seed listings. Deliberately listings only,
   no findings — watching a check populate one is the demo.
+- Live and verified against the `mainstreet` project. Measured: a first check
+  runs in **2.6s** and stores seven findings; the same link checked again comes
+  back from the store in **0.3s**, spending nothing. Re-checking matches on
+  `source_url`, so it updates the listing rather than dropping a second pin.
 
 **Listing detail**
 - Clicking a pin or a card opens the listing in the sidebar: photos, layout,
