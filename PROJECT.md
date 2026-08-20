@@ -91,6 +91,7 @@ lib/
     market.ts               Census geocoder -> HUD Fair Market Rent
     depositLanguage.ts      payment-language patterns in the body
     applicationFee.ts       fee amount and household total
+    license.ts              Texas real estate licence register (TREC)
     areaCode.ts             offline area-code region tagging
     investigate.ts          runs the checks concurrently
     toMapListing.ts         investigation -> map listing
@@ -139,6 +140,11 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
 - **Application fee.** Reads Craigslist's own field, falling back to the body,
   and multiplies a per-person fee by the bedroom count so the household total
   is visible before anyone applies.
+- **Named contact.** Extracts a contact name and company the poster published,
+  then looks them up in the Texas real estate licence register — TREC's data on
+  the Texas Open Data Portal, free Socrata JSON API, no key, refreshed daily.
+  An exact company match reads differently from a partial one, and a name shared
+  by several licence holders says so rather than picking one.
 - Checks that read the post rather than an outside source set `foundLabel` so
   the UI does not print "Records say" over the listing's own words.
 - "Add to map" dedupes by source URL, so checking a seeded listing upgrades that
@@ -177,6 +183,11 @@ paying off, and it is worth showing exactly this way.
 Listing 1 publishes a `$65 per person` application fee; the other two publish
 none.
 
+Listing 2 names "Norice Taylor, Apartment Finders" in its body. TREC returns
+**NORICE CLAUDE TAYLOR, Broker Individual 391926-B, Active** — a real licensed
+broker. The company is a partial match only (APEX APARTMENT FINDERS, LLC) and
+the UI says so.
+
 ### Written but never executed on real positives
 
 - **Deposit-trap language.** All three seed listings are clean, so the detector
@@ -200,7 +211,7 @@ none.
 | Photo reuse matching | SerpApi (~$75/mo) or our own hash index |
 | Who a phone number belongs to | paid provider |
 | Craigslist's gated reply contact | Bright Data or similar; captcha-gated |
-| Person research | Autumn's API — the one piece not rebuildable from public records |
+| Person research beyond the licence register | a paid provider, or one bounded Claude call with web search (~$0.05–0.10 each) |
 | UT Dallas | a second county adapter behind `parcel.ts` |
 
 ---
@@ -264,6 +275,16 @@ checker panel. Two gotchas on Mapbox's static endpoint: `padding` is only legal
 with the `auto` viewport and returns 422 alongside an explicit one, and `auto`
 zooms absurdly close when the two pins nearly coincide — so near-identical
 points get a fixed centre and zoom instead.
+
+**Contact lookups only ever use a name the poster published.** `license.ts`
+reads `contactName`/`contactOrg` straight out of the post body and asks one
+narrow question: does that name hold a Texas licence. It never derives a name
+from an address, a phone number, or a map pin. Autumn's pipeline had a
+reverse-address stage that surfaced whoever is on record living at a property;
+that stage is deliberately absent here, because a dragged pin geocodes to a
+neighbour's house and would publish a stranger's name beside the word "scam".
+Also state the limit wherever the result appears: the register matches on name,
+and anyone can type a licensed agent's name into a post.
 
 **Base UI tab panels, and the redundant `hidden` class.** `page.tsx` sets an
 explicit `hidden` class on the inactive panel *in addition to* Base UI's own

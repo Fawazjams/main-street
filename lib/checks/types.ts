@@ -78,6 +78,9 @@ export interface ParsedListing {
   /** Phone numbers found in the post body, in E.164-ish digits. */
   bodyPhones: string[];
   bodyEmails: string[];
+  /** A contact name the poster published. Never inferred from other sources. */
+  contactName: string | null;
+  contactOrg: string | null;
 }
 
 export interface Investigation {
