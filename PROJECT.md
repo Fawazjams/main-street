@@ -69,7 +69,7 @@ August 2026; the working directory on disk still uses the old name.
 app/
   page.tsx                  tab state + shell, owns the listings array
   layout.tsx
-  api/investigate/route.ts  the checker endpoint (craigslist.org only)
+  api/investigate/route.ts  the checker endpoint (any URL, or pasted text)
 components/
   MapView.tsx               sidebar + map panel
   MapCanvas.tsx             mapbox-gl, dynamic ssr:false
@@ -132,7 +132,7 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
 **Checker**
 - `parseListing` pulls title, price, layout, sqft, posted date, photos, body,
   contacts, the application fee, and the map pin from a live post.
-- Six checks run, results render as claim vs found.
+- Seven checks run, results render as claim vs found.
 - **Deposit-trap language.** Four categories: irreversible payment methods,
   money before viewing, a poster who says they are not local, and a unit that
   cannot be shown. Matches are quoted in context with the reason each is worth
@@ -255,7 +255,7 @@ Nothing else in the app calls a model, so a Craigslist-only demo spends nothing.
 `ANTHROPIC_MODEL` overrides the default `claude-haiku-4-5`.
 
 Measured, not estimated: a pasted listing is **1,223 in / 236 out** on Haiku,
-about **£0.002** — roughly 10,000 pastes per $25. A full web page is bigger,
+about **$0.002** — roughly 10,000 pastes per $25. A full web page is bigger,
 capped at 40K characters (~10K tokens), so about 1.2 cents each.
 
 `NEXT_PUBLIC_MAPBOX_TOKEN` is required or the map shows a placeholder.
