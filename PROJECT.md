@@ -497,11 +497,18 @@ Tailwind's built-in variant would fire them off `prefers-color-scheme` and hand
 a dark-mode visitor half a theme. Deleting that one line breaks the app for
 everyone whose OS is in dark mode, and nothing in the light theme would show it.
 
-**The map switched to `light-v11`.** `streets-v12` is cool grey and fights the
-cream. The campus fill, its outline, the dashed walking route, the destination
-marker and the selected price pin are all `#3d6b4f`, and the static pin-map in
-the checker matches: blush for the poster-controlled pin, green for the address
-we resolved. One constant in `MapCanvas.tsx` moves all three layers.
+**The map recoloured but kept `streets-v12`.** The campus fill, its outline, the
+dashed walking route, the destination marker and the selected price pin are all
+`#3d6b4f`, and the static pin-map in the checker matches: blush for the
+poster-controlled pin, green for the address we resolved. One constant in
+`MapCanvas.tsx` moves all three layers.
+
+The base style was briefly changed to `light-v11`, which sits more quietly under
+the cream, and changed back. `light-v11` thins out street labels at the zooms
+this app actually uses, and cross-street names are the thing a student reads to
+work out where a listing is. A calmer map is not worth less legible streets.
+Swapping it is one line in each of `MapCanvas.tsx` and `checks/PinMap.tsx` if
+that judgement ever changes.
 
 
 **Urgency language is not matched, on purpose.** `depositLanguage.ts` looks for

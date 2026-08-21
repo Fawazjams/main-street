@@ -36,7 +36,7 @@ export function PinMap({ pin, geocoded, miles, address }: PinMapProps) {
   const padding = tight ? "" : "&padding=50";
 
   const src =
-    `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/${markers}/${viewport}/560x260@2x` +
+    `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${markers}/${viewport}/560x260@2x` +
     `?access_token=${TOKEN}${padding}`;
 
   return (

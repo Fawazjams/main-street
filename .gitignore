@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Source art for the design import. The copies the app actually serves are
+# committed under public/art/, byte for byte, so nothing here is unrecoverable.
+imagesToUse/

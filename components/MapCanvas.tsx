@@ -138,7 +138,7 @@ export default function MapCanvas({
     mapboxgl.accessToken = TOKEN;
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/mapbox/light-v11",
+      style: "mapbox://styles/mapbox/streets-v12",
       center: FALLBACK_CENTER,
       zoom: 13,
     });
