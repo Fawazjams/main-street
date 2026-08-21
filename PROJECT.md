@@ -622,9 +622,19 @@ captcha-gated browser stage is ever added, which is paid anyway.
 returns the full post. The captcha only guards the reply contact, not the
 listing.
 
-**`NEXT_PUBLIC_MAPBOX_TOKEN` is also used server-side** in `geocode.ts`. It
-works, but the geocoding quota rides on a token that ships in the browser
-bundle. Add URL restrictions in Mapbox before this is public.
+**Two Mapbox tokens, and the reason is Referer.** The map, the walking routes
+and the static pin image all run in the browser, so the public token has to ship
+in the JavaScript bundle where anyone can lift it off a deployed page. The
+answer to that is a URL restriction — except `geocode.ts` runs on the server,
+server requests carry no Referer, and a URL-restricted token rejects them. The
+failure would be silent and total: every listing stops getting a pin, and the
+pin-vs-address and rent-vs-benchmark checks skip on all of them.
+
+So `MAPBOX_SERVER_TOKEN` is a second token, geocoding scope only, unrestricted,
+never prefixed `NEXT_PUBLIC_`. `geocode.ts` falls back to the public token when
+it is unset, so a fresh clone still works with one token — and logs once when it
+does, because that fallback is precisely what breaks the day someone adds the
+URL restriction.
 
 **Reverse-address lookups, if ever added, only run on a real street address.**
 A fuzzed map pin geocodes to an approximate house and would name the wrong
