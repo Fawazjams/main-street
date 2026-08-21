@@ -5,8 +5,8 @@
 ## 500-word write-up
 
 > Prompt: *Describe the problem you identified, your solution, and the impact it
-> would have.* Three things — so three sections and nothing else. Tech stack and
-> roadmap belong in the tools list and the demo, not here.
+> would have.* Three things, so three sections and nothing else — the tech stack
+> has its own section below.
 
 ### The problem
 
@@ -65,6 +65,47 @@ fee is already extracted; the pattern arrives with volume.
 Everything runs on free public records: a check costs a fraction of a cent
 against a $400 median loss. And with accounts, this same map becomes what my
 friend at Purdue needed — one shortlist, one group, one set of tours.
+
+## Tech stack
+
+*Its own written section on the form — kept out of the 500 words and out of the
+demo.*
+
+**The shape of it.** Every check is a Next.js route handler, not a separate
+service: the slowest lookup finishes in about two seconds, so the whole
+investigation fits inside one request. Each check returns the same `Finding`
+shape — a claim, what an independent source says, and a source link — so adding
+a check is a new file plus one line, and nothing downstream needs to know what
+any check does.
+
+**Free public records, deliberately.** Travis County's appraisal district for
+parcels, HUD for fair-market rents, the US Census geocoder to resolve an address
+to a county, and the Texas Real Estate Commission's licence register through the
+Texas Open Data Portal. Campus boundaries and building locations come from
+OpenStreetMap. No paid provider is wired into anything, so the marginal cost of
+checking a listing is zero and stays zero.
+
+**Where a model is and isn't used.** Craigslist has one stable page shape, so a
+regex parser reads it for nothing. Everywhere else, Claude Haiku turns a page or
+pasted text into the same structured record, with the schema pinned by structured
+outputs so the model transcribes rather than invents. It never judges a listing —
+every finding still comes from a public record. That path costs about $0.002.
+
+**Persistence is the product, not the plumbing.** Supabase holds listings and
+investigations as separate tables: a listing is a place, an investigation is what
+someone learned about it on a given day. Keeping them apart is what lets findings
+survive onto the shared map and what will make fee-churn patterns visible once
+the corpus grows.
+
+**Front end.** Next.js 16 and React 19 in TypeScript, Tailwind v4, shadcn/ui on
+Base UI, Phosphor icons, Mapbox GL for the map and walking routes. Deployed on
+Vercel.
+
+**Because the checker is public.** It resolves every user-supplied URL and
+refuses private addresses before fetching, so pasting a cloud-metadata address
+gets you nothing. It rations the paid path per IP, caps how much text can reach a
+model, and runs two Mapbox tokens — the browser one can be locked to our domain
+without breaking server-side geocoding, which carries no referer.
 
 ## 2-minute demo video script
 
@@ -168,7 +209,8 @@ Target 2:00. Roughly 300 words spoken at a normal pace. Timings are cumulative.
 
 ## Submission checklist
 
-- [ ] Write-up (above)
+- [ ] Write-up — problem, solution, impact (508 words)
+- [ ] Tech stack — its own written section
+- [ ] Tools used — the list
 - [ ] 2-minute demo video
 - [ ] Working project link — `https://main-street-bay.vercel.app`
-- [ ] Tools used (above)
