@@ -6,78 +6,72 @@
 
 ### The problem
 
-Moving off campus is most students' first lease, and the market assumes more
-time and more recourse than they have. Application fees run $50–75
-a listing. Sublets are informal by nature. Roommates get found in group chats.
-And underneath all of it, some of the listings aren't real.
+Four friends of mine at UT Austin applied for the same house. Each paid a $50
+application fee — $200 between them. The plan fell through, the fees weren't refunded, and
+by the time they started over the good listings were gone. They signed somewhere
+worse and pay a few hundred more a month for it. Nobody defrauded them. The
+market just charges you to find out.
 
-Three failures do the damage, in order of how much:
+A friend at Purdue described the other half: you start looking six to eight
+months ahead, and the hard part isn't finding listings — it's getting four people
+to agree on which places to tour, and when.
 
-1. **Ghost listings** — the unit doesn't exist, isn't for rent, or isn't the
-   poster's to rent.
-2. **Fee churning** — application fees collected over and over with no intent
-   to lease.
+Underneath both sits the failure that takes real money: listings that were never
+real. Three patterns, in order:
+
+1. **Ghost listings** — the unit isn't real, isn't for rent, or isn't theirs to rent.
+2. **Fee churning** — fees collected again and again with no intent to lease.
 3. **Deposit traps** — money taken before a viewing, then no lease.
 
-A student can't check any of this. The records exist. They're just nowhere near
-where students are actually looking.
+A student can't check any of it, and 18-to-29-year-olds are 42% likelier than
+other renters to lose money to a fake listing. The records that would settle it
+exist — just nowhere near where students look.
 
 ### The solution
 
-Main Street takes a rental link and checks it against public records, then puts
-what it found onto a shared campus map.
+Main Street takes a rental link, checks it against public records, and puts what
+it found onto a shared campus map.
 
-Seven checks run in about two and a half seconds: the map pin against the stated
-address, the address against the county appraisal roll, the rent against HUD's
-fair-market benchmark, the post's payment language, its application fee, the
-named contact against the state real-estate licence register.
+Seven checks run in about two and a half seconds, and three speak directly to my
+friends' $200. We read the application fee out of the post and multiply it by the
+household, so the real number is visible before anyone pays: our demo listing
+advertises $65 per person — $260 for four — and never says so. We compare the
+asking rent to HUD's benchmark, so overpaying is legible rather than a hunch. And
+we check the pin against the stated address, that address against the county
+appraisal roll, and the named agent against the state licence register.
 
-It deliberately doesn't score. No risk number, no "verified safe" badge. Each
-check states what the post claims beside what an independent source says, and
-the reader draws the conclusion — because a reassuring badge is precisely when
-a student stops reading.
-
-On our demo listing, three independent facts land next to each other: the rent
-is 45% below HUD's benchmark, the map pin sits 1.2 miles from the stated
-address, and the title says $1,095 while the body says $1,025. We never call it
-a scam. We don't have to.
+It doesn't score. No risk number, no "verified" badge — each check states what
+the post claims beside what an independent source says. On our demo listing three
+facts land together: rent 45% below benchmark, pin 1.2 miles from the stated
+address, title saying $1,095 over a body saying $1,025. We never call it a scam.
+We don't have to.
 
 ### Business impact
 
-Findings persist. A first check takes 2.6 seconds; the same link checked again
-comes back in 0.3 seconds from the store and spends nothing. **The second
-student to open a listing reads what the first one found.**
+Findings persist. A first check takes 2.6 seconds; the same link again returns in
+0.3 seconds from the store, spending nothing. The second student reads what the
+first one found.
 
-That's the compounding asset, and it unlocks the problem no single check can
-see. Fee churning is only visible once you can spot one poster collecting fees
-across many listings — a pattern that emerges from a corpus, never from one
-lookup. Every check runs on free public data, so marginal cost per listing is
-effectively zero — and the corpus compounds.
+It's also the only way to catch fee churning: one poster collecting fees across
+many listings is invisible in one lookup and obvious in a corpus. Every check
+runs on free public data.
 
 ### Tech stack
 
-Next.js 16, React 19, TypeScript, Tailwind v4, shadcn/ui on Base UI, Phosphor
-icons. Mapbox GL for the map, geocoding and walking routes. Supabase for the
-shared corpus. Vercel.
-
-Data: Travis County appraisal district, HUD Fair Market Rents, the US Census
-geocoder, the Texas Real Estate Commission register, OpenStreetMap. Claude Haiku
-reads listings from sites we have no parser for, at about $0.002 each.
+Next.js 16, React 19, TypeScript, Tailwind, Supabase, Mapbox, Vercel. Public data
+from Travis County, HUD, the US Census, the Texas Real Estate Commission and
+OpenStreetMap. Claude Haiku reads listings from sites we have no parser for,
+$0.002 each.
 
 ### Limitations and what's next
 
-Auth is next and gates the rest: the login screen is a prototype, and both
-tours and group shortlists wait on it.
+Tours and shared shortlists are the Purdue half of the problem, and they aren't
+built. They need accounts, which is what I'm building next; the group rent split
+and the shareable listing link are the seams they plug into.
 
-We can't verify photos. Reverse-image search is an index, not intelligence, and
-the usable ones are paid, so we show the photos and say plainly that nothing
-verifies they belong to the property.
-
-Zillow, Apartments.com and Trulia block automated readers, so those go through
-paste-the-text. County records are Travis County today; a second campus needs a
-second adapter.
-
----
+We can't verify photos: reverse-image search is an index, not intelligence, and
+the usable ones are paid. Zillow and Apartments.com block automated readers, so
+those go through paste-the-text. County records are Travis County only.
 
 ## 2-minute demo video script
 
