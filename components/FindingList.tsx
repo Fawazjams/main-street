@@ -1,5 +1,20 @@
 "use client";
 
+import {
+  CaretRightIcon,
+  ChartBarIcon,
+  HandCoinsIcon,
+  HouseLineIcon,
+  IdentificationCardIcon,
+  MagnifyingGlassIcon,
+  MapPinIcon,
+  PhoneIcon,
+  ReceiptIcon,
+} from "@phosphor-icons/react/ssr";
+// The /ssr entry ships the icons but not the shared type, which lives in the
+// package's lib. Type-only, so nothing is pulled in at runtime.
+import type { Icon } from "@phosphor-icons/react/lib";
+
 import { FmrLadder } from "@/components/checks/FmrLadder";
 import { PinMap } from "@/components/checks/PinMap";
 import type { Finding, FindingState } from "@/lib/checks/types";
@@ -27,6 +42,26 @@ const STATE_LABEL: Record<FindingState, string> = {
 const CHIP =
   "shrink-0 rounded-full border border-line bg-soft px-2.5 py-0.5 text-[11px] text-body";
 
+/**
+ * An icon per check, describing what the check is about.
+ *
+ * Deliberately about the subject, never the outcome: a map pin for the check
+ * that compares a pin to an address, a house for the one that reads the county
+ * roll. Every one is rendered at the same size and the same muted colour
+ * whatever the check found, so the row of them reads as a table of contents
+ * rather than as a column of verdicts. The moment one of these varies by state
+ * it becomes the traffic light this app exists not to show.
+ */
+const SECTION_ICON: Record<string, Icon> = {
+  "pin-distance": MapPinIcon,
+  parcel: HouseLineIcon,
+  "market-rent": ChartBarIcon,
+  "deposit-language": HandCoinsIcon,
+  "application-fee": ReceiptIcon,
+  license: IdentificationCardIcon,
+  "phone-region": PhoneIcon,
+};
+
 // The section's own name.
 const SECTION_LABEL =
   "text-[11px] font-bold uppercase tracking-[0.06em] text-muted-ink";
@@ -43,7 +78,13 @@ export function FindingList({ findings }: { findings: Finding[] }) {
           className="rounded-2xl border border-line bg-panel p-[18px]"
         >
           <div className="flex items-center justify-between gap-3 border-b border-line pb-2.5">
-            <h4 className={SECTION_LABEL}>{finding.label}</h4>
+            <h4 className={`flex items-center gap-2 ${SECTION_LABEL}`}>
+              {(() => {
+                const Icon = SECTION_ICON[finding.id] ?? MagnifyingGlassIcon;
+                return <Icon size={15} className="shrink-0 text-faint" aria-hidden />;
+              })()}
+              {finding.label}
+            </h4>
             <span className={CHIP}>{STATE_LABEL[finding.state]}</span>
           </div>
 
@@ -88,10 +129,15 @@ export function FindingList({ findings }: { findings: Finding[] }) {
 
           {finding.why && (
             <details className="group mt-3">
-              <summary className={`cursor-pointer list-none hover:text-body ${FIELD_LABEL}`}>
-                <span className="inline-block transition-transform group-open:rotate-90">
-                  ›
-                </span>{" "}
+              <summary
+                className={`flex cursor-pointer list-none items-center gap-1.5 hover:text-body ${FIELD_LABEL}`}
+              >
+                <CaretRightIcon
+                  size={12}
+                  weight="bold"
+                  className="transition-transform group-open:rotate-90"
+                  aria-hidden
+                />
                 Why this matters
               </summary>
               <p className="mt-2 border-l-2 border-line pl-3 text-sm leading-relaxed text-body">

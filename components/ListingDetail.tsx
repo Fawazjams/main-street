@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  ArrowLeftIcon,
+  ArrowSquareOutIcon,
+  PersonSimpleWalkIcon,
+  UsersIcon,
+} from "@phosphor-icons/react/ssr";
+
 import { PhotoStrip } from "@/components/PhotoStrip";
 import { FindingList } from "@/components/FindingList";
 import { Button } from "@/components/ui/button";
@@ -50,9 +57,10 @@ export function ListingDetail({
         <button
           type="button"
           onClick={onClose}
-          className="text-xs text-muted-ink transition-colors hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-xs text-muted-ink transition-colors hover:text-ink"
         >
-          &larr; Back to listings
+          <ArrowLeftIcon size={13} aria-hidden />
+          Back to listings
         </button>
       </div>
 
@@ -77,7 +85,10 @@ export function ListingDetail({
         </p>
 
         <div className="mt-3.5 border-t border-line pt-3.5">
-          <p className={FIELD_LABEL}>Walking to {destinationName}</p>
+          <p className={`flex items-center gap-1.5 ${FIELD_LABEL}`}>
+            <PersonSimpleWalkIcon size={13} aria-hidden />
+            Walking to {destinationName}
+          </p>
           <p className="mt-1 text-[13px] text-body">
             {walk
               ? `${walk.minutes} min · ${walk.miles.toFixed(1)} mi, drawn on the map`
@@ -89,7 +100,10 @@ export function ListingDetail({
 
         {groupSize > 1 && (
           <div className="mt-3.5 rounded-2xl border border-line bg-soft px-4 py-3">
-            <p className={FIELD_LABEL}>Split {groupSize} ways</p>
+            <p className={`flex items-center gap-1.5 ${FIELD_LABEL}`}>
+              <UsersIcon size={13} aria-hidden />
+              Split {groupSize} ways
+            </p>
             <p className="mt-1 text-sm text-ink">
               <span className="font-semibold">${share.toLocaleString()}</span> each ·{" "}
               <span className="text-muted-ink">
@@ -131,6 +145,7 @@ export function ListingDetail({
           disabled={!listing.sourceUrl.startsWith("http")}
         >
           View original posting
+          <ArrowSquareOutIcon size={14} aria-hidden />
         </Button>
       </div>
     </div>

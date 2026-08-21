@@ -56,6 +56,7 @@ reintroduce one.
 | Styling | Tailwind CSS v4 (CSS-first `@theme`, no `tailwind.config.ts`) |
 | Components | shadcn/ui — **on Base UI 1.7.0, not Radix** |
 | Design | Claude Design project, imported into `globals.css` tokens |
+| Icons | Phosphor (`@phosphor-icons/react`), imported from its `/ssr` entry |
 | Map | Mapbox GL JS |
 | Backend | Next route handlers. Supabase planned, not wired |
 
@@ -465,6 +466,29 @@ The parser handles both, but if that check ever starts reporting "not run",
 ---
 
 ## Decisions worth not relitigating
+
+**Icons come from Phosphor's `/ssr` entry, not its root.** The root barrel is a
+client-component module, so importing an icon from it turns whatever renders it
+into a client boundary — and the landing page is a server component whose whole
+point is that it ships no JavaScript. `@phosphor-icons/react/ssr` exports the
+same icons as plain SVG with no context provider, works in server and client
+components alike, and renders into the HTML. Verified: `/`, `/login` and
+`/start` all serve their icons as `<svg>` in the server response, and no
+Phosphor chunk is referenced from the landing page.
+
+The shared `Icon` type is not re-exported from `/ssr`; it comes from
+`@phosphor-icons/react/lib`, type-only, so nothing is pulled in at runtime.
+
+`lucide-react` was a dependency that was never once imported. Removed.
+
+**The per-check icons describe the subject, never the outcome.** A map pin on
+the check that compares a pin to an address, a house on the one that reads the
+county roll, a receipt on the application fee. Every one renders at 15px in the
+same faint brown whatever the check found, so the column reads as a table of
+contents rather than a verdict list. Varying any of them by state — a tick, a
+warning triangle, a colour — rebuilds the traffic light that the findings chip
+and the deleted verdict banner both exist to avoid.
+
 
 **The checker endpoint is public, so it rations the paid path only.** It has no
 auth, and it is the one thing in the app that can spend money, so it carries

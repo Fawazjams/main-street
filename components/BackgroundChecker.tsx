@@ -1,6 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import {
+  LinkSimpleIcon,
+  MagnifyingGlassIcon,
+  TextAlignLeftIcon,
+} from "@phosphor-icons/react/ssr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -118,10 +123,10 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
         <div className="mt-5 flex gap-4 border-b border-line">
           {(
             [
-              ["url", "Paste a link"],
-              ["text", "Paste the listing text"],
+              ["url", "Paste a link", LinkSimpleIcon],
+              ["text", "Paste the listing text", TextAlignLeftIcon],
             ] as const
-          ).map(([value, label]) => (
+          ).map(([value, label, Icon]) => (
             <button
               key={value}
               type="button"
@@ -137,7 +142,10 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
                   : "border-transparent text-muted-ink hover:text-ink",
               )}
             >
-              {label}
+              <span className="inline-flex items-center gap-1.5">
+                <Icon size={15} aria-hidden />
+                {label}
+              </span>
             </button>
           ))}
         </div>
@@ -210,6 +218,11 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
 
         {!loading && !result && !error && (
           <div className="mt-9 rounded-2xl border border-dashed border-line-strong bg-soft px-6 py-9 text-center">
+            <MagnifyingGlassIcon
+              size={28}
+              className="mx-auto mb-3 text-line-strong"
+              aria-hidden
+            />
             <p className="font-heading text-[15px] font-semibold text-ink">
               Nothing checked yet
             </p>

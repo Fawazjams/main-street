@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ArrowLeftIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -93,9 +94,9 @@ export default function AppPage() {
           <Link
             href="/start"
             aria-label="Back to the chooser"
-            className="text-[13px] text-muted-ink no-underline hover:text-ink"
+            className="text-muted-ink transition-colors hover:text-ink"
           >
-            &larr;
+            <ArrowLeftIcon size={16} aria-hidden />
           </Link>
           <Wordmark size="sm" className="min-w-0" />
         </div>

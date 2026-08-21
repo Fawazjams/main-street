@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
 import Image from "next/image";
 import Link from "next/link";
 import { Wordmark } from "@/components/Wordmark";
@@ -123,6 +124,7 @@ export default function Home() {
             className={cn(buttonVariants({ size: "pill-lg" }), "uppercase")}
           >
             Get started
+            <ArrowRightIcon size={16} weight="bold" aria-hidden />
           </Link>
         </div>
       </section>
@@ -259,6 +261,7 @@ export default function Home() {
           )}
         >
           Get started
+          <ArrowRightIcon size={16} weight="bold" aria-hidden />
         </Link>
       </section>
       <div className="bg-cream pt-7">

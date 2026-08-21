@@ -1,5 +1,7 @@
 "use client";
 
+import { UsersIcon } from "@phosphor-icons/react/ssr";
+
 import { cn } from "@/lib/utils";
 
 interface GroupSizePickerProps {
@@ -19,7 +21,8 @@ const SIZES = [1, 2, 3, 4, 5];
 export function GroupSizePicker({ value, onChange }: GroupSizePickerProps) {
   return (
     <div>
-      <p className="text-[11px] font-bold tracking-[0.05em] text-faint uppercase">
+      <p className="flex items-center gap-1.5 text-[11px] font-bold tracking-[0.05em] text-faint uppercase">
+        <UsersIcon size={13} aria-hidden />
         Splitting rent between
       </p>
       <div className="mt-1.5 flex gap-1" role="group" aria-label="Group size">

@@ -1,5 +1,7 @@
 "use client";
 
+import { PersonSimpleWalkIcon } from "@phosphor-icons/react/ssr";
+
 import { MAJORS, majorById } from "@/lib/majors";
 
 interface MajorPickerProps {
@@ -20,7 +22,11 @@ export function MajorPicker({ value, onChange }: MajorPickerProps) {
 
   return (
     <div>
-      <label htmlFor="major" className="text-[11px] font-bold tracking-[0.05em] text-faint uppercase">
+      <label
+        htmlFor="major"
+        className="flex items-center gap-1.5 text-[11px] font-bold tracking-[0.05em] text-faint uppercase"
+      >
+        <PersonSimpleWalkIcon size={13} aria-hidden />
         Walking to
       </label>
       <select

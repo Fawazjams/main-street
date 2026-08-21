@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ArrowLeftIcon } from "@phosphor-icons/react/ssr";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -43,9 +44,10 @@ export default function LoginPage() {
       <header className="px-6 py-4 sm:px-8">
         <Link
           href="/"
-          className="text-[13px] text-muted-ink no-underline hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-[13px] text-muted-ink no-underline hover:text-ink"
         >
-          &larr; Back
+          <ArrowLeftIcon size={14} aria-hidden />
+          Back
         </Link>
       </header>
 

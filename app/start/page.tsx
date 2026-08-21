@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  ArrowRightIcon,
+  MagnifyingGlassIcon,
+  MapTrifoldIcon,
+} from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Wordmark } from "@/components/Wordmark";
@@ -51,7 +56,9 @@ export default function StartPage() {
             href="/app"
             className="flex flex-col gap-4 rounded-3xl border-2 border-sky bg-panel p-8 no-underline transition-colors hover:bg-sky-tint"
           >
-            <div className="h-[46px] w-[46px] rounded-xl bg-sky" />
+            <div className="flex h-[46px] w-[46px] items-center justify-center rounded-xl bg-sky text-ink">
+              <MapTrifoldIcon size={26} aria-hidden />
+            </div>
             <div>
               <h2 className="mb-2 font-heading text-[19px] font-semibold text-ink">
                 Map view
@@ -61,14 +68,19 @@ export default function StartPage() {
                 one shared map.
               </p>
             </div>
-            <span className="text-[13px] font-bold text-[#3E6C8E]">Open map &rarr;</span>
+            <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#3E6C8E]">
+              Open map
+              <ArrowRightIcon size={14} weight="bold" aria-hidden />
+            </span>
           </Link>
 
           <Link
             href="/app?tab=checker"
             className="flex flex-col gap-4 rounded-3xl border-2 border-blush bg-panel p-8 no-underline transition-colors hover:bg-blush-tint"
           >
-            <div className="h-[46px] w-[46px] rounded-full bg-blush" />
+            <div className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-blush text-ink">
+              <MagnifyingGlassIcon size={24} aria-hidden />
+            </div>
             <div>
               <h2 className="mb-2 font-heading text-[19px] font-semibold text-ink">
                 Background checker
@@ -78,7 +90,10 @@ export default function StartPage() {
                 reach out.
               </p>
             </div>
-            <span className="text-[13px] font-bold text-alert">Open checker &rarr;</span>
+            <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-alert">
+              Open checker
+              <ArrowRightIcon size={14} weight="bold" aria-hidden />
+            </span>
           </Link>
         </div>
       </div>
