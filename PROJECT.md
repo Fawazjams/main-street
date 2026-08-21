@@ -355,6 +355,12 @@ the UI says so.
 
 **P1 — a judge notices these missing**
 
+2. **Search and filters**: price, bedrooms, walking time. Three listings hide
+   this; a real corpus makes it the first thing anyone reaches for.
+3. **The school picker.** The landing page exists but the app is hardwired to UT
+   Austin. `campus.ts` and `majors.ts` are already isolated for this, and it is
+   what makes the pitch about students rather than about one campus.
+
 **P2 — the named demo features**
 
 4. **Tour scheduling.** Needs auth.
@@ -363,12 +369,9 @@ the UI says so.
 
 **P3 — rounds it out**
 
-6. Search and filters: price, bedrooms, walking time.
-7. "Where are you going to school?" landing page. The campus outline and
-   walking destination are already isolated in `campus.ts` for this.
-8. Saved listings / shortlist.
-9. Bike and car travel times — same endpoint, different profile.
-10. Majors for a second campus, once UT Dallas has a building list.
+6. Saved listings / shortlist.
+7. Bike and car travel times — same endpoint, different profile.
+8. Majors for a second campus, once UT Dallas has a building list.
 
 **Blocked on money**
 
@@ -393,9 +396,8 @@ the UI says so.
 | | Needs |
 |---|---|
 | Fee-churn pattern detection | our own corpus over time; the fee itself is now extracted |
-| Supabase auth + persistence | listings are in-memory, reset on reload |
-| Caching by listing URL | — |
-| "Where are you going to school?" landing page | — |
+| Supabase auth | the screens exist and fake it; persistence itself is done |
+| "Where are you going to school?" school picker | the landing page exists; it is single-campus |
 | Group tours + shared rent split | `perPersonRent` exists and cards show it |
 | Photo reuse matching | SerpApi (~$75/mo) or our own hash index |
 | Who a phone number belongs to | paid provider |
