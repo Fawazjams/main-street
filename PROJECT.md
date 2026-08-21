@@ -145,7 +145,12 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
   tab variant.
 - Five illustrations ship in `public/art/`, all served through `next/image`. The
   cut-out streetscape sits on a sky-coloured band rather than carrying its own
-  sky, so the band is a token and not part of the artwork.
+  sky, so the band is a token and not part of the artwork. Its height follows
+  the image's aspect ratio up to a 340px ceiling rather than being fixed: a
+  fixed band crops by an amount that depends on the viewport, and at 1900px a
+  150px band was showing only the bottom sixth of the artwork. The ceiling is
+  there because an uncropped band is 407px on a wide monitor, which pushed the
+  call to action below the fold.
 
 **Shell**
 - Four screens, and they are real routes: `/` landing, `/login`, `/start`, and

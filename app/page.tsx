@@ -79,28 +79,41 @@ export default function Home() {
         </Link>
       </header>
 
-      {/* The art is cut out, so the sky is the band behind it rather than
-          part of the image. */}
-      <div className="h-[150px] overflow-hidden bg-sky">
+      {/*
+        The art is cut out — 23% of it is transparent and the top tenth is
+        empty — so the sky is the band behind it rather than part of the image.
+
+        Height follows the width rather than being fixed, up to a ceiling. A
+        fixed 150px band plus object-cover threw away everything above the
+        ground floor, and how much it cropped depended on the viewport — at
+        1900px the image renders 407px tall, so five sixths of it was gone.
+
+        The ceiling exists because the band is not the point of the page. Left
+        unbounded it is 407px on a 1900px monitor, which pushed the call to
+        action below the fold. At 340px the art is uncropped at any width up to
+        1571px — every normal laptop — and beyond that it trims the roof tips
+        rather than the whole upper storey.
+      */}
+      <div className="bg-sky">
         <Image
           src="/art/neighborhood-streetscape.png"
           alt="Illustration of a neighbourhood streetscape"
           width={1073}
           height={232}
           priority
-          className="h-full w-full object-cover object-bottom"
+          className="block h-auto max-h-[340px] w-full object-cover object-bottom"
         />
       </div>
 
-      <section className="px-6 pt-20 pb-24 text-center">
-        <div className="mx-auto max-w-[700px]">
+      <section className="px-6 pt-12 pb-24 text-center">
+        <div className="mx-auto max-w-[1000px]">
           <p className="mb-5 text-[11px] font-bold tracking-[0.1em] text-muted-ink uppercase">
             Student housing near your campus
           </p>
-          <h1 className="mb-6 font-heading text-4xl leading-[1.1] font-semibold text-balance sm:text-5xl md:text-[52px]">
+          <h1 className="mb-6 font-heading text-4xl leading-[1.08] font-semibold text-balance sm:text-5xl md:text-[52px] lg:text-[64px]">
             Every listing gets a little safer once someone&rsquo;s looked.
           </h1>
-          <p className="mx-auto mb-9 max-w-[560px] text-lg leading-relaxed text-pretty text-body">
+          <p className="mx-auto mb-9 max-w-[760px] text-lg leading-relaxed text-pretty text-body lg:text-xl">
             Paste a rental link, and we independently check what we can about the property
             and the contact. It joins a shared map, so the next student who finds it reads
             what you found instead of paying to find it again.
