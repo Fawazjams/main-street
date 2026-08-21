@@ -5,8 +5,9 @@
 ## 500-word write-up
 
 > Prompt: *Describe the problem you identified, your solution, and the impact it
-> would have.* Three things, so three sections and nothing else — the tech stack
-> has its own section below.
+> would have.* Hard limit 500 words; this is **494**, and 495 even on a counter
+> that splits hyphenated words. Three things, so three sections and nothing else —
+> the tech stack has its own section below.
 
 ### The problem
 
@@ -27,8 +28,8 @@ real. Three patterns, in order.
 2. **Fee churning** — fees collected repeatedly with no intent to lease.
 3. **Deposit traps** — money taken before a viewing, then no lease.
 
-A student has no way to check any of it. The records that would settle it exist —
-county property rolls, federal rent benchmarks, state licence registers — just
+A student has no way to check any of it. The records that would settle it —
+county property rolls, federal rent benchmarks, state licence registers — exist
 nowhere near where students look.
 
 ### The solution
@@ -40,13 +41,13 @@ Seven checks run in about two and a half seconds, and three speak directly to my
 friends' $200. We pull the application fee out of the post and multiply it by the
 household, so the real cost shows before anyone pays — our demo listing
 advertises $65 a person, $260 for four, and never says so. We compare the rent to
-HUD's fair-market benchmark, so overpaying is legible rather than a hunch. And we
-check the pin against the stated address, that address against the county roll,
+HUD's fair-market benchmark, so overpaying is legible. And we check the pin
+against the stated address, that address against the county roll,
 and the named agent against the state licence register.
 
 It does not score. No risk number, no "verified" badge — each check states what
-the post claims beside what an independent source says, because a reassuring
-badge is exactly when someone stops reading. On
+the post claims beside what an independent source says, because a badge is
+exactly when someone stops reading. On
 our demo listing three facts land together: rent 45% below benchmark, a pin 1.2
 miles from the stated address, a title saying $1,095 over a body saying $1,025.
 We never call it a scam. We don't have to.
@@ -56,11 +57,11 @@ We never call it a scam. We don't have to.
 The findings stay. A first check takes 2.6 seconds; the same link checked again
 comes back in 0.3 seconds from our store, spending nothing. The second student to
 open that listing reads what the first one found, so covering a campus gets
-cheaper as more students use it rather than costing each of them again.
+cheaper the more students use it.
 
 It is also the only way to catch fee churning: one poster collecting $50 from a
-dozen applicants is invisible in a single lookup and obvious across a corpus. The
-fee is already extracted; the pattern arrives with volume.
+dozen applicants is invisible in one lookup and obvious across a corpus. The fee
+is already extracted; the pattern needs only volume.
 
 Everything runs on free public records: a check costs a fraction of a cent
 against a $400 median loss. And with accounts, this same map becomes what my
@@ -209,7 +210,7 @@ Target 2:00. Roughly 300 words spoken at a normal pace. Timings are cumulative.
 
 ## Submission checklist
 
-- [ ] Write-up — problem, solution, impact (508 words)
+- [ ] Write-up — problem, solution, impact (494 words, limit 500)
 - [ ] Tech stack — its own written section
 - [ ] Tools used — the list
 - [ ] 2-minute demo video
