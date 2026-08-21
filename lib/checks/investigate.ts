@@ -22,7 +22,12 @@ export type InvestigationInput =
   | { kind: "url"; url: string }
   | { kind: "text"; text: string };
 
-const isCraigslist = (url: string) => {
+/**
+ * Craigslist is the one site with a free parser, so this is also the test for
+ * whether reading a link will cost anything. Exported for the route handler,
+ * which rations the paid path harder than the free one.
+ */
+export const isCraigslist = (url: string) => {
   try {
     return /(^|\.)craigslist\.org$/i.test(new URL(url).hostname);
   } catch {

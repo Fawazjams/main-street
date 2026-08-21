@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { investigate, type InvestigationInput } from "@/lib/checks/investigate";
+import {
+  investigate,
+  isCraigslist,
+  type InvestigationInput,
+} from "@/lib/checks/investigate";
 import { toMapListing } from "@/lib/checks/toMapListing";
 import {
   assertPublicUrl,
@@ -8,6 +12,7 @@ import {
 } from "@/lib/checks/safeFetch";
 import { claudeConfigured } from "@/lib/checks/parseWithClaude";
 import { listingBySourceUrl, saveInvestigation } from "@/lib/db/listings";
+import { bucket, callerKey, take } from "@/lib/rateLimit";
 
 /**
  * Enough text to be a listing, capped so nobody can paste a novel.
@@ -19,7 +24,50 @@ import { listingBySourceUrl, saveInvestigation } from "@/lib/db/listings";
  */
 const MIN_TEXT = 40;
 
+/**
+ * Two allowances, because the two kinds of request cost wildly different money.
+ *
+ * A Craigslist link is parsed by regex and, once anyone has checked it, served
+ * straight from the store - free, and exactly what a judge clicking around the
+ * demo does, so it gets a generous allowance. Reading anything else needs a
+ * model call, which is the only thing here that spends, so it gets a tight one.
+ *
+ * Rate limiting the free path as hard as the paid one would degrade the demo to
+ * protect nothing.
+ */
+const ALL_REQUESTS = bucket(30, 10 * 60_000);
+const MODEL_REQUESTS = bucket(5, 10 * 60_000);
+
+const tooMany = (retryAfter: number) =>
+  NextResponse.json(
+    { error: "That is a lot of checks at once. Give it a few minutes." },
+    { status: 429, headers: { "Retry-After": String(retryAfter) } },
+  );
+
+/**
+ * `force` re-runs a check that has already been stored.
+ *
+ * Not something a visitor gets to ask for. The findings it would re-fetch are
+ * free, but they come from Travis County, HUD, the Census and TREC, and making
+ * them re-answer the same question from one Vercel IP on demand is how you get
+ * that IP blocked - which would break the checker for everyone, quietly, and
+ * for nothing gained.
+ *
+ * Kept usable for us via a shared secret. When RECHECK_SECRET is unset - which
+ * is the default, and the case in every deployment until somebody sets it -
+ * force is never honoured at all.
+ */
+function forceAllowed(request: Request): boolean {
+  const secret = process.env.RECHECK_SECRET;
+  if (!secret) return false;
+  return request.headers.get("x-recheck-secret") === secret;
+}
+
 export async function POST(request: Request) {
+  const caller = callerKey(request);
+  const overall = take(ALL_REQUESTS, caller);
+  if (!overall.allowed) return tooMany(overall.retryAfter);
+
   let body: unknown;
   try {
     body = await request.json();
@@ -48,6 +96,10 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    // Pasted text has no URL to look up, so it can never be served from the
+    // store and always reaches the model. Charge the tight allowance here.
+    const paid = take(MODEL_REQUESTS, caller);
+    if (!paid.allowed) return tooMany(paid.retryAfter);
     input = { kind: "text", text: trimmed.slice(0, MAX_LISTING_CHARS) };
   } else if (typeof url === "string" && url.trim() !== "") {
     try {
@@ -72,7 +124,7 @@ export async function POST(request: Request) {
   // re-fetching the post, re-hitting four public records, and on a
   // non-Craigslist listing spending a model call to learn the same thing.
   // Pasted text has no stable URL to look up, so it always runs fresh.
-  if (input.kind === "url" && force !== true) {
+  if (input.kind === "url" && !(force === true && forceAllowed(request))) {
     const existing = await listingBySourceUrl(input.url);
     if (existing?.investigation) {
       return NextResponse.json({
@@ -85,6 +137,13 @@ export async function POST(request: Request) {
         mapListing: existing,
       });
     }
+  }
+
+  if (input.kind === "url" && !isCraigslist(input.url)) {
+    // Nothing stored, and no free parser for this host, so the next step is a
+    // model call. Same allowance as pasted text, for the same reason.
+    const paid = take(MODEL_REQUESTS, caller);
+    if (!paid.allowed) return tooMany(paid.retryAfter);
   }
 
   try {

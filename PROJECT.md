@@ -459,6 +459,37 @@ The parser handles both, but if that check ever starts reporting "not run",
 
 ## Decisions worth not relitigating
 
+**The checker endpoint is public, so it rations the paid path only.** It has no
+auth, and it is the one thing in the app that can spend money, so it carries
+two allowances per IP: thirty requests per ten minutes overall, and five per ten
+minutes for anything that reaches a model. A Craigslist link is parsed by regex
+and, once anyone has checked it, served from the store — free, and exactly what
+a judge clicking around the demo does, so rationing it as hard as the paid path
+would degrade the demo to protect nothing.
+
+The limiter counts in memory, per serverless instance, so a burst spread across
+warm lambdas gets a fresh allowance on each one and a distributed attack walks
+through it. That is understood and accepted: it is a speed bump, not a security
+boundary. The actual ceiling is that the Anthropic balance is prepaid with
+auto-reload off, so the worst case is bounded by what is in the account rather
+than by what a card will absorb. Upstash or Vercel's edge rate limiting would
+count globally, and both cost money or an account.
+
+**Per-request model cost is one shared constant.** `MAX_LISTING_CHARS` caps both
+the fetched-page path and the pasted-text path at 12,000 characters. It was
+40,000, which put a single request at roughly 1.2 cents and a $25 balance at
+about two thousand requests. The two paths share the constant so the numbers
+cannot drift; raising it raises the cost of being spammed, in direct proportion.
+
+**`force` is not something a visitor gets to ask for.** It re-runs a check that
+is already stored. The lookups it repeats are free, but they come from Travis
+County, HUD, the Census and TREC, and letting anyone make those re-answer the
+same question from one Vercel IP on demand is how that IP gets blocked — which
+would break the checker for everyone, quietly. It is honoured only when
+`RECHECK_SECRET` is set *and* the request carries a matching header. Unset,
+which is the default and the state of every deployment, it is ignored entirely.
+
+
 **The redesign kept the Base UI tab machinery.** The design file draws the tabs
 as two plain buttons switching a variable. Porting that literally would have
 thrown away `keepMounted` — the map would be torn down and rebuilt on every tab
