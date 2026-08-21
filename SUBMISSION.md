@@ -4,73 +4,67 @@
 
 ## 500-word write-up
 
+> Prompt: *Describe the problem you identified, your solution, and the impact it
+> would have.* Three things — so three sections and nothing else. Tech stack and
+> roadmap belong in the tools list and the demo, not here.
+
 ### The problem
 
 Four friends of mine at UT Austin applied for the same house. Each paid a $50
-application fee — $200 between them. The plan fell through, the fees weren't refunded, and
-by the time they started over the good listings were gone. They signed somewhere
-worse and pay a few hundred more a month for it. Nobody defrauded them. The
-market just charges you to find out.
+application fee — $200 between them. The plan fell through, the fees weren't
+refunded, and by the time they started over the good listings were gone. They
+signed somewhere worse and pay a few hundred more a month for it. Nobody
+defrauded them. The market simply charges you to find out.
 
 A friend at Purdue described the other half: you start looking six to eight
 months ahead, and the hard part isn't finding listings — it's getting four people
 to agree on which places to tour, and when.
 
-Underneath both sits the failure that takes real money: listings that were never
-real. Three patterns, in order:
+Both are expensive. The third failure isn't survivable: some listings were never
+real. Three patterns, in order.
 
 1. **Ghost listings** — the unit isn't real, isn't for rent, or isn't theirs to rent.
-2. **Fee churning** — fees collected again and again with no intent to lease.
+2. **Fee churning** — fees collected repeatedly with no intent to lease.
 3. **Deposit traps** — money taken before a viewing, then no lease.
 
-A student can't check any of it, and 18-to-29-year-olds are the likeliest renters
-to lose money to a fake listing. The records that would settle it exist — just
+A student has no way to check any of it. The records that would settle it exist —
+county property rolls, federal rent benchmarks, state licence registers — just
 nowhere near where students look.
 
 ### The solution
 
-Main Street takes a rental link, checks it against public records, and puts what
-it found onto a shared campus map.
+Main Street takes a rental link, checks it against those public records, and puts
+what it found onto a shared campus map.
 
 Seven checks run in about two and a half seconds, and three speak directly to my
 friends' $200. We pull the application fee out of the post and multiply it by the
-household, so the real number shows before anyone pays: our demo listing
-advertises $65 per person — $260 for four — and never says so. We compare the
-rent to HUD's benchmark, so overpaying is legible rather than a hunch. And we
+household, so the real cost shows before anyone pays — our demo listing
+advertises $65 a person, $260 for four, and never says so. We compare the rent to
+HUD's fair-market benchmark, so overpaying is legible rather than a hunch. And we
 check the pin against the stated address, that address against the county roll,
 and the named agent against the state licence register.
 
-It doesn't score. No risk number, no "verified" badge — each check states what
-the post claims beside what an independent source says. On our demo listing three
-facts land together: rent 45% below benchmark, pin 1.2 miles from the stated
-address, title saying $1,095 over a body saying $1,025. We never call it a scam.
-We don't have to.
+It does not score. No risk number, no "verified" badge — each check states what
+the post claims beside what an independent source says, because a reassuring
+badge is exactly when someone stops reading. On
+our demo listing three facts land together: rent 45% below benchmark, a pin 1.2
+miles from the stated address, a title saying $1,095 over a body saying $1,025.
+We never call it a scam. We don't have to.
 
-### Business impact
+### The impact
 
-Findings persist. A first check takes 2.6 seconds; the same link again returns in
-0.3 seconds from the store, spending nothing — the second student reads what the
-first one found.
+The findings stay. A first check takes 2.6 seconds; the same link checked again
+comes back in 0.3 seconds from our store, spending nothing. The second student to
+open that listing reads what the first one found, so covering a campus gets
+cheaper as more students use it rather than costing each of them again.
 
-It's also the only way to catch fee churning: one poster collecting fees across
-many listings is invisible in one lookup and obvious in a corpus. Every check
-runs on free public data.
+It is also the only way to catch fee churning: one poster collecting $50 from a
+dozen applicants is invisible in a single lookup and obvious across a corpus. The
+fee is already extracted; the pattern arrives with volume.
 
-### Tech stack
-
-Next.js 16, React 19, TypeScript, Tailwind, Supabase, Mapbox, Vercel. Public data
-from Travis County, HUD, the US Census, the Texas Real Estate Commission and
-OpenStreetMap. Claude Haiku reads sites we have no parser for, $0.002 each.
-
-### Limitations and what's next
-
-Tours and shared shortlists are the Purdue half of the problem, and they aren't
-built. They need accounts, which is what I'm building next; the group rent split
-and the shareable listing link are the seams they plug into.
-
-We can't verify photos: reverse-image search is an index, not intelligence, and
-the usable ones are paid. Zillow and Apartments.com block automated readers, so
-those paste in as text. County records are Travis County only.
+Everything runs on free public records: a check costs a fraction of a cent
+against a $400 median loss. And with accounts, this same map becomes what my
+friend at Purdue needed — one shortlist, one group, one set of tours.
 
 ## 2-minute demo video script
 
