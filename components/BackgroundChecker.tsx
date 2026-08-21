@@ -23,9 +23,18 @@ interface InvestigationResponse {
 
 type Mode = "url" | "text";
 
-function Fact({ children }: { children: React.ReactNode }) {
+/**
+ * One fact the post published, as a chip.
+ *
+ * The colour is fixed per field, never per value - the rent chip is the same
+ * colour whether the rent is $500 or $5,000. It separates one fact from the
+ * next and says nothing about any of them.
+ */
+function Fact({ tone, children }: { tone: string; children: React.ReactNode }) {
   return (
-    <span className="rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-xs text-neutral-800">
+    <span
+      className={cn("rounded-full px-3 py-1.5 text-xs font-semibold", tone)}
+    >
       {children}
     </span>
   );
@@ -95,15 +104,18 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
   const listing = result?.listing;
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="mx-auto w-full max-w-2xl px-6 py-10">
-        <h2 className="text-lg font-medium text-neutral-900">Check a listing</h2>
-        <p className="mt-1 text-sm text-neutral-600">
-          Paste a link, or the listing text if the site blocks us. We look up what we can independently and show it next to
-          what the post claims. We do not score listings — the disagreements are the point.
+    <div className="h-full overflow-y-auto bg-cream">
+      <div className="mx-auto w-full max-w-[680px] px-6 py-10">
+        <h2 className="font-heading text-[21px] font-semibold text-ink">
+          Check a listing
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-body">
+          Paste a link, or the listing text if the site blocks us. We look up what we can
+          independently and show it next to what the post claims. We do not score listings
+          — the disagreements are the point.
         </p>
 
-        <div className="mt-5 flex gap-4 border-b border-neutral-200">
+        <div className="mt-5 flex gap-4 border-b border-line">
           {(
             [
               ["url", "Paste a link"],
@@ -119,10 +131,10 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
               }}
               aria-pressed={mode === value}
               className={cn(
-                "-mb-px border-b-2 pb-2 text-sm transition-colors",
+                "-mb-px border-b-2 pb-2.5 text-[13px] transition-colors",
                 mode === value
-                  ? "border-neutral-900 font-medium text-neutral-900"
-                  : "border-transparent text-neutral-500 hover:text-neutral-800",
+                  ? "border-green font-semibold text-ink"
+                  : "border-transparent text-muted-ink hover:text-ink",
               )}
             >
               {label}
@@ -146,7 +158,7 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
               aria-invalid={error !== null}
               disabled={loading}
             />
-            <Button onClick={runCheck} disabled={loading}>
+            <Button size="pill" className="uppercase" onClick={runCheck} disabled={loading}>
               {loading ? "Checking…" : "Check listing"}
             </Button>
           </div>
@@ -163,26 +175,31 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
               aria-invalid={error !== null}
               disabled={loading}
               rows={7}
-              className="w-full rounded-md border border-neutral-200 bg-white p-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus-visible:border-neutral-400 focus-visible:outline-none disabled:opacity-60"
+              className="w-full rounded-md border border-line bg-panel p-3 text-sm text-ink placeholder:text-faint focus-visible:border-green focus-visible:outline-none disabled:opacity-60"
             />
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <p className="text-xs text-neutral-500">
+            <div className="mt-2.5 flex items-center justify-between gap-3">
+              <p className="text-xs text-faint">
                 For sites that block automated readers — Zillow, Facebook Marketplace,
                 Apartments.com.
               </p>
-              <Button onClick={runCheck} disabled={loading}>
+              <Button
+                size="pill"
+                className="uppercase"
+                onClick={runCheck}
+                disabled={loading}
+              >
                 {loading ? "Checking…" : "Check listing"}
               </Button>
             </div>
           </div>
         )}
 
-        {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
+        {error && <p className="mt-2.5 text-sm text-alert">{error}</p>}
 
         {loading && (
           <div className="mt-8 space-y-4">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="rounded-lg border border-neutral-200 p-4">
+              <div key={i} className="rounded-2xl border border-line bg-panel p-4">
                 <Skeleton className="h-4 w-44" />
                 <Skeleton className="mt-3 h-3 w-full" />
                 <Skeleton className="mt-2 h-3 w-2/3" />
@@ -192,9 +209,11 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
         )}
 
         {!loading && !result && !error && (
-          <div className="mt-10 rounded-lg border border-dashed border-neutral-300 px-6 py-10 text-center">
-            <p className="text-sm font-medium text-neutral-900">Nothing checked yet</p>
-            <p className="mx-auto mt-1 max-w-sm text-sm text-neutral-600">
+          <div className="mt-9 rounded-2xl border border-dashed border-line-strong bg-soft px-6 py-9 text-center">
+            <p className="font-heading text-[15px] font-semibold text-ink">
+              Nothing checked yet
+            </p>
+            <p className="mx-auto mt-1.5 max-w-[360px] text-[13px] leading-relaxed text-body">
               Whatever you check is saved to the shared map, so the next student searching
               your campus reads what you found instead of paying to find it again.
             </p>
@@ -204,7 +223,7 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
         {result && listing && !loading && (
           <div className="mt-8">
             <section>
-              <h3 className="text-base font-medium leading-snug text-neutral-900">
+              <h3 className="font-heading text-lg leading-snug font-semibold text-ink">
                 {listing.title}
               </h3>
               {listing.url ? (
@@ -212,12 +231,12 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
                   href={listing.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-1 block truncate text-xs text-neutral-500 underline underline-offset-2 hover:text-neutral-900"
+                  className="mt-1 block truncate text-xs text-faint underline underline-offset-2 hover:text-body"
                 >
                   {listing.url}
                 </a>
               ) : (
-                <p className="mt-1 text-xs text-neutral-500">Read from pasted text</p>
+                <p className="mt-1 text-xs text-faint">Read from pasted text</p>
               )}
 
               {listing.photos.length > 0 && (
@@ -226,16 +245,30 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
                 </div>
               )}
 
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {listing.price !== null && <Fact>${listing.price.toLocaleString()}/mo</Fact>}
-                {listing.bedrooms !== null && <Fact>{listing.bedrooms}BR</Fact>}
-                {listing.bathrooms !== null && <Fact>{listing.bathrooms}BA</Fact>}
-                {listing.sqft !== null && <Fact>{listing.sqft.toLocaleString()} sqft</Fact>}
-                {listing.applicationFee && <Fact>{listing.applicationFee} app fee</Fact>}
-                <Fact>{listing.photos.length} photos</Fact>
+              <div className="mt-3.5 flex flex-wrap gap-1.5">
+                {listing.price !== null && (
+                  <Fact tone="bg-blush text-ink">
+                    ${listing.price.toLocaleString()}/mo
+                  </Fact>
+                )}
+                {listing.bedrooms !== null && (
+                  <Fact tone="bg-green text-cream">{listing.bedrooms}BR</Fact>
+                )}
+                {listing.bathrooms !== null && (
+                  <Fact tone="bg-gold text-ink">{listing.bathrooms}BA</Fact>
+                )}
+                {listing.sqft !== null && (
+                  <Fact tone="bg-fill text-ink">
+                    {listing.sqft.toLocaleString()} sqft
+                  </Fact>
+                )}
+                {listing.applicationFee && (
+                  <Fact tone="bg-fill text-ink">{listing.applicationFee} app fee</Fact>
+                )}
+                <Fact tone="bg-sky text-ink">{listing.photos.length} photos</Fact>
               </div>
 
-              <p className="mt-2.5 text-xs text-neutral-500">
+              <p className="mt-3 text-xs text-faint">
                 {listing.mapAddress ?? "No address published"}
                 {listing.postedAt &&
                   ` · posted ${new Date(listing.postedAt).toLocaleDateString()}`}
@@ -246,8 +279,8 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
             </section>
 
             {result.fromStore && (
-              <div className="mt-8 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3">
-                <p className="text-sm text-orange-900">
+              <div className="mt-8 rounded-2xl border border-green/35 bg-green-tint px-4 py-3">
+                <p className="text-sm text-body">
                   Another student already checked this one
                   {result.checkedAt
                     ? ` on ${new Date(result.checkedAt).toLocaleDateString()}`
@@ -257,28 +290,28 @@ export function BackgroundChecker({ onShowOnMap }: BackgroundCheckerProps) {
               </div>
             )}
 
-            <div className="mt-8">
+            <div className="mt-7">
               <FindingList findings={result.findings} />
             </div>
 
             {mapListing && (
-              <div className="mt-8 flex items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+              <div className="mt-7 flex items-center justify-between gap-4 rounded-2xl border-2 border-green bg-panel p-4">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-neutral-900">
+                  <p className="truncate text-[13px] font-semibold text-ink">
                     {mapListing.title}
                   </p>
-                  <p className="mt-0.5 text-xs text-neutral-600">
+                  <p className="mt-1 text-xs text-body">
                     ${mapListing.bodyPrice.toLocaleString()}/mo · {mapListing.bedrooms} bd
                     {mapListing.coords ? "" : " · no location to pin"}
                   </p>
                 </div>
-                <Button variant="outline" onClick={() => onShowOnMap(mapListing)}>
+                <Button size="pill-sm" onClick={() => onShowOnMap(mapListing)}>
                   View on map
                 </Button>
               </div>
             )}
 
-            <p className={cn("mt-4 text-xs text-neutral-500")}>
+            <p className="mt-4 text-xs text-faint">
               {result.readBy === "claude" && (
                 <>
                   The listing details were read by a language model rather than a parser,

@@ -20,14 +20,14 @@ export function MajorPicker({ value, onChange }: MajorPickerProps) {
 
   return (
     <div>
-      <label htmlFor="major" className="text-xs text-neutral-500">
+      <label htmlFor="major" className="text-[11px] font-bold tracking-[0.05em] text-faint uppercase">
         Walking to
       </label>
       <select
         id="major"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-1.5 w-full rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-sm text-neutral-900 hover:border-neutral-400 focus-visible:border-neutral-400 focus-visible:outline-none"
+        className="mt-1.5 h-9 w-full rounded-md border border-line bg-panel px-2.5 text-sm text-ink transition-colors hover:border-line-strong focus-visible:border-green focus-visible:outline-none"
       >
         {MAJORS.map((option) => (
           <option key={option.id} value={option.id}>
@@ -35,7 +35,7 @@ export function MajorPicker({ value, onChange }: MajorPickerProps) {
           </option>
         ))}
       </select>
-      <p className="mt-1 text-xs text-neutral-500">{major.building}</p>
+      <p className="mt-1.5 text-xs text-muted-ink">{major.building}</p>
     </div>
   );
 }

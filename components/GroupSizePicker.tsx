@@ -19,7 +19,9 @@ const SIZES = [1, 2, 3, 4, 5];
 export function GroupSizePicker({ value, onChange }: GroupSizePickerProps) {
   return (
     <div>
-      <p className="text-xs text-neutral-500">Splitting rent between</p>
+      <p className="text-[11px] font-bold tracking-[0.05em] text-faint uppercase">
+        Splitting rent between
+      </p>
       <div className="mt-1.5 flex gap-1" role="group" aria-label="Group size">
         {SIZES.map((size) => (
           <button
@@ -28,17 +30,17 @@ export function GroupSizePicker({ value, onChange }: GroupSizePickerProps) {
             onClick={() => onChange(size)}
             aria-pressed={value === size}
             className={cn(
-              "h-7 min-w-9 rounded-md border px-2 text-xs transition-colors",
+              "h-7 min-w-9 rounded-full border px-2 text-xs transition-colors",
               value === size
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400",
+                ? "border-green bg-green text-cream"
+                : "border-line bg-panel text-body hover:border-line-strong",
             )}
           >
             {size}
             {size === 5 && "+"}
           </button>
         ))}
-        <span className="ml-1 self-center text-xs text-neutral-500">
+        <span className="ml-1 self-center text-xs text-muted-ink">
           {value === 1 ? "just me" : `${value} people`}
         </span>
       </div>

@@ -28,8 +28,8 @@ export function FmrLadder({ bars, listingPrice, area, year }: FmrLadderProps) {
   const lineOffset = toHeight(listingPrice);
 
   return (
-    <figure className="mt-3 rounded-lg border border-neutral-200 bg-white p-4">
-      <figcaption className="text-xs text-neutral-600">
+    <figure className="mt-3 rounded-lg border border-line bg-panel p-4">
+      <figcaption className="text-xs text-body">
         HUD fair-market rent by bedroom — {area}
         {year ? ` (${year})` : ""}
       </figcaption>
@@ -37,10 +37,10 @@ export function FmrLadder({ bars, listingPrice, area, year }: FmrLadderProps) {
       <div className="relative mt-6" style={{ height: CHART_HEIGHT }}>
         {/* The asking rent, drawn across every bar rather than beside one. */}
         <div
-          className="absolute inset-x-0 z-10 border-t border-dashed border-red-400"
+          className="absolute inset-x-0 z-10 border-t border-dashed border-ink"
           style={{ bottom: lineOffset }}
         >
-          <span className="absolute -top-2.5 right-0 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-medium text-white">
+          <span className="absolute -top-2.5 right-0 rounded bg-ink px-1.5 py-0.5 text-[10px] font-medium text-cream">
             this listing ${listingPrice.toLocaleString()}
           </span>
         </div>
@@ -51,7 +51,7 @@ export function FmrLadder({ bars, listingPrice, area, year }: FmrLadderProps) {
               <span
                 className={cn(
                   "mb-1 text-[10px]",
-                  bar.highlight ? "font-medium text-neutral-900" : "text-neutral-500",
+                  bar.highlight ? "font-medium text-ink" : "text-muted-ink",
                 )}
               >
                 ${bar.value.toLocaleString()}
@@ -59,7 +59,7 @@ export function FmrLadder({ bars, listingPrice, area, year }: FmrLadderProps) {
               <div
                 className={cn(
                   "w-full rounded-t",
-                  bar.highlight ? "bg-neutral-800" : "bg-neutral-200",
+                  bar.highlight ? "bg-sky" : "bg-fill",
                 )}
                 style={{ height: toHeight(bar.value) }}
               />
@@ -74,7 +74,7 @@ export function FmrLadder({ bars, listingPrice, area, year }: FmrLadderProps) {
             key={bar.label}
             className={cn(
               "flex-1 text-center text-[11px]",
-              bar.highlight ? "font-medium text-neutral-900" : "text-neutral-500",
+              bar.highlight ? "font-medium text-ink" : "text-muted-ink",
             )}
           >
             {bar.label}

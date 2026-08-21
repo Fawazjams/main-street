@@ -15,7 +15,7 @@ import type { StoredListing } from "@/lib/db/listings";
 // server bundle under the App Router.
 const MapCanvas = dynamic(() => import("@/components/MapCanvas"), {
   ssr: false,
-  loading: () => <div className="h-full w-full bg-neutral-100" />,
+  loading: () => <div className="h-full w-full bg-fill" />,
 });
 
 interface MapViewProps {
@@ -111,7 +111,7 @@ export function MapView({
 
   return (
     <div className="flex h-full min-h-0">
-      <aside className="flex w-96 shrink-0 flex-col border-r border-neutral-200">
+      <aside className="flex w-[392px] shrink-0 flex-col border-r border-line bg-panel">
         {selected ? (
           <ListingDetail
             listing={selected as StoredListing}
@@ -122,11 +122,11 @@ export function MapView({
           />
         ) : (
           <>
-            <div className="border-b border-neutral-200 px-4 py-3">
-              <h2 className="text-sm font-medium text-neutral-900">
+            <div className="border-b border-line px-4 py-3.5">
+              <h2 className="font-heading text-[15px] font-semibold text-ink">
                 {listings.length} listings near UT Austin
               </h2>
-              <p className="mt-0.5 text-xs text-neutral-500">
+              <p className="mt-1 text-xs text-faint">
                 {placedCount} on the map
                 {onRequestCount > 0 &&
                   `, ${onRequestCount} ${onRequestCount === 1 ? "shares" : "share"} the address on contact`}
@@ -134,7 +134,7 @@ export function MapView({
               </p>
             </div>
 
-            <div className="space-y-3 border-b border-neutral-200 px-4 py-3">
+            <div className="space-y-3 border-b border-line px-4 py-3.5">
               <MajorPicker value={majorId} onChange={setMajorId} />
               <GroupSizePicker value={groupSize} onChange={setGroupSize} />
             </div>

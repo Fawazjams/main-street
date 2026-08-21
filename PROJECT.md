@@ -55,6 +55,7 @@ reintroduce one.
 | UI | React 19.2.8, TypeScript |
 | Styling | Tailwind CSS v4 (CSS-first `@theme`, no `tailwind.config.ts`) |
 | Components | shadcn/ui — **on Base UI 1.7.0, not Radix** |
+| Design | Claude Design project, imported into `globals.css` tokens |
 | Map | Mapbox GL JS |
 | Backend | Next route handlers. Supabase planned, not wired |
 
@@ -67,11 +68,16 @@ August 2026; the working directory on disk still uses the old name.
 
 ```
 app/
-  page.tsx                  tab state + shell, owns the listings array
-  layout.tsx
+  page.tsx                  landing page, a server component
+  login/page.tsx            prototype login, no backend behind it
+  start/page.tsx            map or checker
+  app/page.tsx              tab state + shell, owns the listings array
+  layout.tsx                Geist, Geist Mono and Lora via next/font
+  globals.css               the palette, as shadcn tokens plus named ones
   api/investigate/route.ts  the checker endpoint (any URL, or pasted text)
   api/listings/route.ts     the shared map, with findings attached
 components/
+  Wordmark.tsx              the house and the name
   MapView.tsx               sidebar + map panel
   MapCanvas.tsx             mapbox-gl, dynamic ssr:false
   ListingCard.tsx
@@ -87,6 +93,7 @@ components/
   ui/                       shadcn primitives
 lib/
   types.ts                  Listing, perPersonRent
+  accents.ts                card accent colours, derived from the listing id
   seedListings.ts           three real Austin Craigslist posts
   geocode.ts                Mapbox forward geocoding
   photos.ts                 Craigslist photo size variants
@@ -112,6 +119,7 @@ lib/
     toMapListing.ts         investigation -> map listing
   fixtures/
     autumn-dean-keeton.json a real Autumn response, kept as reference
+public/art/                 the five illustrations the design ships with
 scripts/
   check-hud.mjs             pin -> county -> HUD, prints the raw payload
   seed-db.mjs               loads the seed listings into Supabase
@@ -126,10 +134,33 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
 
 ### Done
 
+**Look and feel**
+- The whole app runs on the Claude Design project's palette: warm paper rather
+  than white, green as the only action colour, and gold, blush and sky as
+  accents that separate things without ranking them. Lora carries every heading,
+  Geist the body, Geist Mono the small labels.
+- It is one theme, stated once in `globals.css` as shadcn's own tokens, which is
+  why button, badge, input and card picked up the design without being rewritten
+  — the diff there is a pill size, two accent variants and a segmented-control
+  tab variant.
+- Five illustrations ship in `public/art/`, all served through `next/image`. The
+  cut-out streetscape sits on a sky-coloured band rather than carrying its own
+  sky, so the band is a token and not part of the artwork.
+
 **Shell**
-- Two tabs, Map view and Background checker. Tab state lives in `page.tsx`, not
-  inside a tab component, so merging the two views later is a rearrange.
+- Four screens, and they are real routes: `/` landing, `/login`, `/start`, and
+  `/app`. The landing page is a server component and ships no JavaScript.
+- Two tabs inside `/app`, Map view and Background checker. Tab state lives in
+  `app/page.tsx`, not inside a tab component, so merging the two views later is
+  a rearrange.
 - Panels use `keepMounted` so switching tabs does not tear down the map.
+- `/start` links to `/app` and `/app?tab=checker`. The tab rides in the URL with
+  `replaceState` and the open listing with `pushState`, so back and forward move
+  between listings rather than between tabs.
+- The login screen is a prototype with nothing behind it: it checks both fields
+  have something in them, keeps the name in `sessionStorage` for the greeting on
+  `/start`, and continues. Nothing is guarded — typing `/app` straight into the
+  address bar works. Replacing it is the standing P0.
 
 **Map**
 - Mapbox with `fitBounds` over the pins rather than a hardcoded center, so it
@@ -208,8 +239,8 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
 
 **Distance to campus**
 - Every placed listing shows its walking time and distance to campus. Selecting
-  one draws the real walking path as a dashed orange line, with the campus
-  outlined and filled in the same orange.
+  one draws the real walking path as a dashed green line, with the campus
+  outlined and filled in the same green.
 - Directions rather than the Matrix API, even though Matrix would fetch every
   listing at once: the two disagree by a couple of minutes on the same pair, and
   a card reading "18 min" beside a line drawn as a 20-minute route is the kind
@@ -318,7 +349,9 @@ the UI says so.
 
 1. **Supabase auth.** Persistence is done; auth is not, and it is the
    prerequisite for tours and groups. It is also what lets the row-level
-   policies stop being wide open.
+   policies stop being wide open. The screens now exist — `/login` and the
+   `sessionStorage` read on `/start` are the only two places that fake it, so
+   the swap is contained to those files plus a guard on `/app`.
 
 **P1 — a judge notices these missing**
 
@@ -425,6 +458,51 @@ The parser handles both, but if that check ever starts reporting "not run",
 ---
 
 ## Decisions worth not relitigating
+
+**The redesign kept the Base UI tab machinery.** The design file draws the tabs
+as two plain buttons switching a variable. Porting that literally would have
+thrown away `keepMounted` — the map would be torn down and rebuilt on every tab
+switch — and re-inherited the both-panels-stacked bug the explicit `hidden`
+class exists to fix. The pill treatment is a `variant` on `TabsList` instead, so
+the design sits on top of the machinery rather than replacing it.
+
+**The four screens are routes, not a `screen` variable.** The design file holds
+them in one component's state, which is right for a design tool and wrong here:
+`?listing=<id>` is the seam group invites hang off, and reconciling it with a
+screen variable would have cost the shareable link. `/`, `/login`, `/start` and
+`/app` keep it, and let the landing page be a server component that ships no
+JavaScript.
+
+**The findings chip stays neutral, against the design.** The design draws it
+green for a check that ran and gold for one that found nothing. That is
+defensible as check-status rather than verdict, but green and amber down a
+column of findings is the traffic light this app exists not to show, and it is
+the same affordance as the verdict banner that was built and deliberately
+removed. All four states wear the same quiet chip; the words carry the
+difference. The gold "Title says $1,095" chip on a card is different and stays —
+it states a fact about the post and judges nothing.
+
+**Card accents are derived from the listing id and mean nothing.** They exist so
+adjacent cards in the sidebar are distinguishable. Keying them on array position
+would have reshuffled every colour when the seed listings are replaced by the
+shared map, which invites a reader to see a ranking that is not there. Green is
+deliberately not in the rotation: it is the action colour and the colour of the
+walking route, and a card wearing it would look picked out.
+
+**One theme, and `@custom-variant dark` is load-bearing.** There is no dark
+palette — a warm paper design has no honest dark counterpart, and half of one is
+worse than none. But the shadcn primitives are peppered with `dark:` utilities,
+and without redefining the variant against a `.dark` class nothing ever sets,
+Tailwind's built-in variant would fire them off `prefers-color-scheme` and hand
+a dark-mode visitor half a theme. Deleting that one line breaks the app for
+everyone whose OS is in dark mode, and nothing in the light theme would show it.
+
+**The map switched to `light-v11`.** `streets-v12` is cool grey and fights the
+cream. The campus fill, its outline, the dashed walking route, the destination
+marker and the selected price pin are all `#3d6b4f`, and the static pin-map in
+the checker matches: blush for the poster-controlled pin, green for the address
+we resolved. One constant in `MapCanvas.tsx` moves all three layers.
+
 
 **Urgency language is not matched, on purpose.** `depositLanguage.ts` looks for
 irreversible payment methods, money before viewing, an absent poster, and a unit

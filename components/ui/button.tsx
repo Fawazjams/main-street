@@ -18,6 +18,10 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        // The design's two other button colours. Gold sits on the dark band,
+        // where green would disappear; ink is the quiet outlined one.
+        gold: "bg-gold text-ink hover:bg-gold/85",
+        ink: "border-ink bg-transparent text-ink hover:bg-ink hover:text-cream",
       },
       size: {
         default:
@@ -31,6 +35,13 @@ const buttonVariants = cva(
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
+        // Pills. Every button in the design is fully round; the three sizes are
+        // the header/inline one, the form one, and the marketing call to
+        // action. Uppercase is applied per use rather than baked in, because
+        // the in-app buttons keep sentence case.
+        "pill-sm": "h-8 gap-1.5 rounded-full px-3.5 text-xs font-semibold",
+        pill: "h-9 gap-1.5 rounded-full px-5 text-xs font-bold tracking-[0.04em]",
+        "pill-lg": "h-12 gap-2 rounded-full px-8 text-[13px] font-bold tracking-[0.04em]",
       },
     },
     defaultVariants: {

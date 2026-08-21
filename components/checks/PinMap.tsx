@@ -22,8 +22,8 @@ export function PinMap({ pin, geocoded, miles, address }: PinMapProps) {
   const distance =
     miles < 0.1 ? `${Math.round(miles * 5280)} feet apart` : `${miles.toFixed(1)} miles apart`;
 
-  // Orange for the poster-controlled pin, blue for the geocoded address.
-  const markers = `pin-s+ea580c(${pin.lng},${pin.lat}),pin-s+1d4ed8(${geocoded.lng},${geocoded.lat})`;
+  // Blush for the poster-controlled pin, green for the address we resolved.
+  const markers = `pin-s+e89b9b(${pin.lng},${pin.lat}),pin-s+3d6b4f(${geocoded.lng},${geocoded.lat})`;
 
   // "auto" frames both points, but collapses to absurd zoom when they coincide,
   // so near-identical points get a fixed frame instead. Mapbox rejects the
@@ -36,11 +36,11 @@ export function PinMap({ pin, geocoded, miles, address }: PinMapProps) {
   const padding = tight ? "" : "&padding=50";
 
   const src =
-    `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${markers}/${viewport}/560x260@2x` +
+    `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/${markers}/${viewport}/560x260@2x` +
     `?access_token=${TOKEN}${padding}`;
 
   return (
-    <figure className="mt-3 overflow-hidden rounded-lg border border-neutral-200 bg-white">
+    <figure className="mt-3 overflow-hidden rounded-lg border border-line bg-panel">
       <div className="relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -50,17 +50,17 @@ export function PinMap({ pin, geocoded, miles, address }: PinMapProps) {
           width={560}
           height={260}
         />
-        <span className="absolute right-2 top-2 rounded bg-neutral-900/85 px-2 py-1 text-[11px] font-medium text-white">
+        <span className="absolute right-2 top-2 rounded bg-ink/85 px-2 py-1 text-[11px] font-medium text-cream">
           {distance}
         </span>
       </div>
-      <figcaption className="flex flex-wrap gap-4 border-t border-neutral-200 px-3 py-2 text-[11px] text-neutral-600">
+      <figcaption className="flex flex-wrap gap-4 border-t border-line px-3 py-2 text-[11px] text-body">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block size-2 rounded-full bg-orange-600" />
+          <span className="inline-block size-2 rounded-full bg-blush" />
           Craigslist pin
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block size-2 rounded-full bg-blue-700" />
+          <span className="inline-block size-2 rounded-full bg-green" />
           {address}
         </span>
       </figcaption>

@@ -22,7 +22,7 @@ export function PhotoStrip({ photos, title }: PhotoStripProps) {
 
   return (
     <div>
-      <div className="overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+      <div className="overflow-hidden rounded-lg border border-line bg-fill">
         <a href={photoAt(lead, "1200x900")} target="_blank" rel="noreferrer">
           <Image
             src={photoAt(lead, "600x450")}
@@ -43,7 +43,7 @@ export function PhotoStrip({ photos, title }: PhotoStripProps) {
               href={photoAt(photo, "1200x900")}
               target="_blank"
               rel="noreferrer"
-              className="shrink-0 overflow-hidden rounded-md border border-neutral-200 bg-neutral-100"
+              className="shrink-0 overflow-hidden rounded-md border border-line bg-fill"
             >
               <Image
                 src={photoAt(photo, "300x300")}

@@ -15,7 +15,7 @@ const FALLBACK_CENTER: [number, number] = [-97.7431, 30.2849];
 
 const CAMPUS_SOURCE = "campus";
 const WALK_SOURCE = "walk-route";
-const ORANGE = "#ea580c";
+const GREEN = "#3d6b4f";
 
 const EMPTY = { type: "FeatureCollection", features: [] } as const;
 
@@ -40,13 +40,13 @@ function addCampusLayers(map: mapboxgl.Map) {
       id: "campus-fill",
       type: "fill",
       source: CAMPUS_SOURCE,
-      paint: { "fill-color": ORANGE, "fill-opacity": 0.15 },
+      paint: { "fill-color": GREEN, "fill-opacity": 0.15 },
     });
     map.addLayer({
       id: "campus-outline",
       type: "line",
       source: CAMPUS_SOURCE,
-      paint: { "line-color": ORANGE, "line-width": 1.5, "line-opacity": 0.8 },
+      paint: { "line-color": GREEN, "line-width": 1.5, "line-opacity": 0.8 },
     });
   }
 
@@ -58,7 +58,7 @@ function addCampusLayers(map: mapboxgl.Map) {
       source: WALK_SOURCE,
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
-        "line-color": ORANGE,
+        "line-color": GREEN,
         "line-width": 3,
         "line-dasharray": [1.5, 1.5],
       },
@@ -138,7 +138,7 @@ export default function MapCanvas({
     mapboxgl.accessToken = TOKEN;
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/mapbox/streets-v12",
+      style: "mapbox://styles/mapbox/light-v11",
       center: FALLBACK_CENTER,
       zoom: 13,
     });
@@ -185,7 +185,7 @@ export default function MapCanvas({
       el.type = "button";
       el.dataset.listingId = listing.id;
       el.className =
-        "cursor-pointer rounded-full border border-neutral-900/15 bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 shadow-sm transition-colors hover:bg-neutral-100 data-[selected=true]:border-neutral-900 data-[selected=true]:bg-neutral-900 data-[selected=true]:text-white";
+        "cursor-pointer rounded-full border border-line bg-panel px-2.5 py-1 text-xs font-semibold text-ink shadow-sm transition-colors hover:bg-fill data-[selected=true]:border-green data-[selected=true]:bg-green data-[selected=true]:text-cream";
       el.textContent = `$${listing.bodyPrice.toLocaleString()}`;
       el.setAttribute("aria-label", `${listing.title}, $${listing.bodyPrice} a month`);
       el.addEventListener("click", (event) => {
@@ -242,9 +242,9 @@ export default function MapCanvas({
 
     const el = document.createElement("div");
     el.className =
-      "flex items-center gap-1.5 whitespace-nowrap rounded-full border border-orange-600 bg-white px-2.5 py-1 text-xs font-medium text-orange-700 shadow-sm";
+      "flex items-center gap-1.5 whitespace-nowrap rounded-full border border-green bg-panel px-2.5 py-1 text-xs font-medium text-green shadow-sm";
     const dot = document.createElement("span");
-    dot.className = "inline-block h-2 w-2 shrink-0 rounded-full bg-orange-600";
+    dot.className = "inline-block h-2 w-2 shrink-0 rounded-full bg-green";
     el.append(dot, document.createTextNode(destination.building));
     el.title = destination.label;
 
@@ -295,7 +295,7 @@ export default function MapCanvas({
 
       const el = document.createElement("div");
       el.className =
-        "whitespace-nowrap rounded-full bg-orange-600 px-2.5 py-1 text-xs font-medium text-white shadow-sm";
+        "whitespace-nowrap rounded-full bg-green px-2.5 py-1 text-xs font-semibold text-cream shadow-sm";
       el.textContent = `${walk.minutes} min walk · ${walk.miles.toFixed(1)} mi`;
       walkLabelRef.current = new mapboxgl.Marker({ element: el })
         .setLngLat(midpointOf(path))
@@ -315,12 +315,12 @@ export default function MapCanvas({
 
   if (!TOKEN) {
     return (
-      <div className="flex h-full items-center justify-center bg-neutral-50 p-8">
+      <div className="flex h-full items-center justify-center bg-soft p-8">
         <div className="max-w-sm text-center">
-          <p className="text-sm font-medium text-neutral-900">Map needs a Mapbox token</p>
-          <p className="mt-2 text-sm text-neutral-600">
-            Add <code className="rounded bg-neutral-200 px-1 py-0.5 text-xs">NEXT_PUBLIC_MAPBOX_TOKEN</code>{" "}
-            to <code className="rounded bg-neutral-200 px-1 py-0.5 text-xs">.env.local</code> and
+          <p className="text-sm font-medium text-ink">Map needs a Mapbox token</p>
+          <p className="mt-2 text-sm text-body">
+            Add <code className="rounded bg-fill px-1 py-0.5 text-xs">NEXT_PUBLIC_MAPBOX_TOKEN</code>{" "}
+            to <code className="rounded bg-fill px-1 py-0.5 text-xs">.env.local</code> and
             restart the dev server. Listings still show in the sidebar without it.
           </p>
         </div>

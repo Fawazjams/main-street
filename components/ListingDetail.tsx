@@ -25,6 +25,8 @@ const whenChecked = (iso: string) => {
   return then.toLocaleDateString();
 };
 
+const FIELD_LABEL = "text-[11px] font-bold uppercase tracking-[0.06em] text-faint";
+
 /**
  * Everything known about one listing.
  *
@@ -43,62 +45,54 @@ export function ListingDetail({
   const investigation = listing.investigation;
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-neutral-200 px-5 py-3">
-        <div className="min-w-0">
-          <p className="text-base font-medium text-neutral-900">
-            ${listing.bodyPrice.toLocaleString()}
-            <span className="text-sm font-normal text-neutral-500">/mo</span>
-          </p>
-          <p className="truncate text-xs text-neutral-500">{listing.title}</p>
-        </div>
+    <div className="flex h-full flex-col bg-panel">
+      <div className="shrink-0 border-b border-line px-4 py-3.5">
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close listing"
-          className="shrink-0 rounded-md px-2 py-1 text-sm text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+          className="text-xs text-muted-ink transition-colors hover:text-ink"
         >
-          ✕
+          &larr; Back to listings
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         {listing.photos.length > 0 && (
           <PhotoStrip photos={listing.photos} title={listing.title} />
         )}
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-          <div>
-            <dt className="text-neutral-500">Layout</dt>
-            <dd className="text-neutral-900">
-              {listing.bedrooms} bd · {listing.bathrooms} ba
-            </dd>
-          </div>
-          <div>
-            <dt className="text-neutral-500">Walk to {destinationName}</dt>
-            <dd className="text-neutral-900">
-              {walk ? `${walk.minutes} min · ${walk.miles.toFixed(1)} mi` : "—"}
-            </dd>
-          </div>
-          <div className="col-span-2">
-            <dt className="text-neutral-500">Address</dt>
-            <dd className="text-neutral-900">
-              {listing.address ??
-                (listing.addressStatus === "on-request"
-                  ? "Shared once you email, text, or call"
-                  : "None published")}
-            </dd>
-          </div>
-        </dl>
+        <h3 className="mt-3.5 font-heading text-[17px] leading-snug font-semibold text-ink">
+          {listing.title}
+        </h3>
+        <p className="mt-1 text-[15px] font-semibold text-ink">
+          ${listing.bodyPrice.toLocaleString()}
+          <span className="font-normal text-muted-ink">/mo</span> · {listing.bedrooms} bd
+          · {listing.bathrooms} ba
+        </p>
+        <p className="mt-1 text-[13px] text-muted-ink">
+          {listing.address ??
+            (listing.addressStatus === "on-request"
+              ? "Address shared once you email, text, or call"
+              : "No address published")}
+        </p>
+
+        <div className="mt-3.5 border-t border-line pt-3.5">
+          <p className={FIELD_LABEL}>Walking to {destinationName}</p>
+          <p className="mt-1 text-[13px] text-body">
+            {walk
+              ? `${walk.minutes} min · ${walk.miles.toFixed(1)} mi, drawn on the map`
+              : listing.coords
+                ? "Working out the route…"
+                : "No pin, so there is nothing to measure from."}
+          </p>
+        </div>
 
         {groupSize > 1 && (
-          <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3">
-            <p className="text-xs text-neutral-500">
-              Split {groupSize} ways
-            </p>
-            <p className="mt-0.5 text-sm text-neutral-900">
-              <span className="font-medium">${share.toLocaleString()}</span> each ·{" "}
-              <span className="text-neutral-500">
+          <div className="mt-3.5 rounded-2xl border border-line bg-soft px-4 py-3">
+            <p className={FIELD_LABEL}>Split {groupSize} ways</p>
+            <p className="mt-1 text-sm text-ink">
+              <span className="font-semibold">${share.toLocaleString()}</span> each ·{" "}
+              <span className="text-muted-ink">
                 ${listing.bodyPrice.toLocaleString()} total
               </span>
             </p>
@@ -108,16 +102,18 @@ export function ListingDetail({
         <div className="mt-6">
           {investigation ? (
             <>
-              <p className="mb-4 text-xs text-neutral-500">
+              <p className="mb-3.5 text-xs text-faint">
                 Checked {whenChecked(investigation.checkedAt)}. You are reading what that
                 check found — nobody had to run it again.
               </p>
               <FindingList findings={investigation.findings} />
             </>
           ) : (
-            <div className="rounded-lg border border-dashed border-neutral-300 px-5 py-8 text-center">
-              <p className="text-sm font-medium text-neutral-900">Not checked yet</p>
-              <p className="mx-auto mt-1 max-w-xs text-sm text-neutral-600">
+            <div className="rounded-2xl border border-dashed border-line-strong bg-soft px-5 py-8 text-center">
+              <p className="font-heading text-[15px] font-semibold text-ink">
+                Not checked yet
+              </p>
+              <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-body">
                 Nobody has run this one through the background checker. Paste its link in
                 the checker tab and the findings will land here for everyone.
               </p>
@@ -126,9 +122,10 @@ export function ListingDetail({
         </div>
       </div>
 
-      <div className="shrink-0 border-t border-neutral-200 px-5 py-3">
+      <div className="shrink-0 border-t border-line px-4 py-3">
         <Button
-          variant="outline"
+          variant="ink"
+          size="pill-sm"
           className="w-full"
           onClick={() => window.open(listing.sourceUrl, "_blank", "noreferrer")}
           disabled={!listing.sourceUrl.startsWith("http")}
