@@ -11,6 +11,8 @@ interface ListingDetailProps {
   listing: StoredListing;
   groupSize: number;
   walk: WalkRoute | null;
+  /** The building the walk is measured to. */
+  destinationName: string;
   onClose: () => void;
 }
 
@@ -30,7 +32,13 @@ const whenChecked = (iso: string) => {
  * of whoever checked it first, so the second student reads the evidence rather
  * than a badge saying somebody else was satisfied.
  */
-export function ListingDetail({ listing, groupSize, walk, onClose }: ListingDetailProps) {
+export function ListingDetail({
+  listing,
+  groupSize,
+  walk,
+  destinationName,
+  onClose,
+}: ListingDetailProps) {
   const share = perPersonRent(listing, groupSize);
   const investigation = listing.investigation;
 
@@ -67,7 +75,7 @@ export function ListingDetail({ listing, groupSize, walk, onClose }: ListingDeta
             </dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Walk to campus</dt>
+            <dt className="text-neutral-500">Walk to {destinationName}</dt>
             <dd className="text-neutral-900">
               {walk ? `${walk.minutes} min · ${walk.miles.toFixed(1)} mi` : "—"}
             </dd>

@@ -1,8 +1,8 @@
-import { CAMPUS } from "./campus";
+import { CAMPUS_DEFAULT } from "./majors";
 import type { Coords } from "./types";
 
 /**
- * Walking route from a listing to campus.
+ * Walking route from a listing to wherever the student is actually going.
  *
  * Directions rather than the Matrix API, even though Matrix would fetch every
  * listing in one request: Matrix and Directions disagree by a couple of minutes
@@ -10,7 +10,7 @@ import type { Coords } from "./types";
  * 20-minute route is the kind of small lie that costs trust. One call per
  * listing keeps the number and the drawn path the same thing.
  *
- * Bikes and cars are the same endpoint with a different profile, when wanted.
+ * Bikes and cars are the same endpoint with a different profile.
  */
 
 export interface WalkRoute {
@@ -20,11 +20,18 @@ export interface WalkRoute {
   geometry: Coords[];
 }
 
+// Keyed on both ends. Keying on the origin alone was fine while everything
+// walked to the Tower, and would silently serve a Law student the Computer
+// Science walk the moment destinations could differ.
 const cache = new Map<string, WalkRoute | null>();
-const keyFor = (from: Coords) => `${from[0].toFixed(5)},${from[1].toFixed(5)}`;
+const keyFor = (from: Coords, to: Coords) =>
+  `${from[0].toFixed(5)},${from[1].toFixed(5)}>${to[0].toFixed(5)},${to[1].toFixed(5)}`;
 
-export async function walkToCampus(from: Coords): Promise<WalkRoute | null> {
-  const key = keyFor(from);
+export async function walkTo(
+  from: Coords,
+  to: Coords = CAMPUS_DEFAULT.coords,
+): Promise<WalkRoute | null> {
+  const key = keyFor(from, to);
   if (cache.has(key)) return cache.get(key) ?? null;
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -32,7 +39,7 @@ export async function walkToCampus(from: Coords): Promise<WalkRoute | null> {
 
   const url =
     `https://api.mapbox.com/directions/v5/mapbox/walking/` +
-    `${from[0]},${from[1]};${CAMPUS.center[0]},${CAMPUS.center[1]}` +
+    `${from[0]},${from[1]};${to[0]},${to[1]}` +
     `?access_token=${token}&overview=full&geometries=geojson`;
 
   try {

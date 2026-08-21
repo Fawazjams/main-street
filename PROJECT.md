@@ -80,6 +80,7 @@ components/
   ListingDetail.tsx         one listing: photos, split, walk, findings
   FindingList.tsx           claim-vs-record rendering, shared by both views
   GroupSizePicker.tsx       how many people are splitting the rent
+  MajorPicker.tsx           which building the walk is measured to
   checks/
     FmrLadder.tsx           HUD bedroom ladder with the rent drawn across it
     PinMap.tsx              Mapbox static image, both pins and the distance
@@ -90,6 +91,7 @@ lib/
   geocode.ts                Mapbox forward geocoding
   photos.ts                 Craigslist photo size variants
   campus.ts                 UT Austin outline and walking destination
+  majors.ts                 major -> building, from OSM building centroids
   walk.ts                   Mapbox walking route to campus, cached
   db/
     client.ts               Supabase client, null when unconfigured
@@ -224,6 +226,25 @@ line in `investigate.ts`. Nothing downstream needs to know what a check does.
 - Real figures: Dean Keeton is 20 min / 1.0 mi, 45th and Speedway 36 min /
   1.9 mi.
 
+**Walking to your major**
+- "Distance to campus" flattens 430 acres into one point. Picking a major moves
+  the destination to that major's building, and every walking time and drawn
+  route recomputes against it.
+- 24 majors, each mapped to a named building whose coordinates come from
+  OpenStreetMap via Overpass. The major-to-building mapping is a reasonable
+  approximation, not gospel — departments share buildings and move.
+- The spread is the point. From the Dean Keeton listing: **20 min** to the
+  Tower, **6 min** to Townes Hall for Law, **18 min** to the Belo Center for
+  Journalism, **22 min** to Sánchez for Education. A single "distance to
+  campus" figure was hiding a 16-minute range.
+- Routes are cached per origin *and* destination. Keying on origin alone would
+  have served a Law student the Computer Science walk.
+- **Building centroids route to the nearest entrance**, which is right for a
+  named building and wrong for "campus in general" — the Tower's centroid sits
+  inside the building and cost 7 minutes of detour, so that one entry uses the
+  plaza outside. Two coordinates 21 metres apart, very different answers. Worth
+  remembering when adding a major.
+
 **Rent split**
 - One group-size control for the whole sidebar, not per listing — a student
   searches as a group, and this is the value a real group replaces later.
@@ -314,6 +335,7 @@ the UI says so.
    walking destination are already isolated in `campus.ts` for this.
 8. Saved listings / shortlist.
 9. Bike and car travel times — same endpoint, different profile.
+10. Majors for a second campus, once UT Dallas has a building list.
 
 **Blocked on money**
 

@@ -5,7 +5,9 @@ import dynamic from "next/dynamic";
 import { ListingCard } from "@/components/ListingCard";
 import { ListingDetail } from "@/components/ListingDetail";
 import { GroupSizePicker } from "@/components/GroupSizePicker";
-import { walkToCampus, type WalkRoute } from "@/lib/walk";
+import { MajorPicker } from "@/components/MajorPicker";
+import { walkTo, type WalkRoute } from "@/lib/walk";
+import { majorById, CAMPUS_DEFAULT } from "@/lib/majors";
 import type { Listing } from "@/lib/types";
 import type { StoredListing } from "@/lib/db/listings";
 
@@ -36,6 +38,8 @@ export function MapView({
   // One group size for the whole map. A student searches as a group, not a
   // listing at a time, and this is the value a real group replaces later.
   const [groupSize, setGroupSize] = useState(1);
+  // Which building the walking times are measured to.
+  const [majorId, setMajorId] = useState(CAMPUS_DEFAULT.id);
   const [walks, setWalks] = useState<Record<string, WalkRoute | null>>({});
 
   const placedCount = listings.filter((l) => l.coords !== null).length;
@@ -77,15 +81,21 @@ export function MapView({
   // Walking routes are fetched once per listing and cached in lib/walk, so
   // re-selecting a listing costs nothing and the drawn path always matches the
   // minutes shown against it.
+  // Keyed by major as well as listing, so changing major does not have to
+  // clear anything: the new destination simply misses, and switching back hits
+  // what is already there. lib/walk caches the network call on both ends too.
   useEffect(() => {
     let cancelled = false;
+    const destination = majorById(majorId).coords;
 
     (async () => {
       for (const listing of listings) {
-        if (!listing.coords || listing.id in walks) continue;
-        const route = await walkToCampus(listing.coords);
+        if (!listing.coords) continue;
+        const key = `${majorId}|${listing.id}`;
+        if (key in walks) continue;
+        const route = await walkTo(listing.coords, destination);
         if (cancelled) return;
-        setWalks((current) => ({ ...current, [listing.id]: route }));
+        setWalks((current) => ({ ...current, [key]: route }));
       }
     })();
 
@@ -94,10 +104,10 @@ export function MapView({
     };
     // `walks` is read only to skip work already done; keying on it would loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listings]);
+  }, [listings, majorId]);
 
   const selected = listings.find((l) => l.id === selectedId) ?? null;
-  const selectedWalk = selectedId ? (walks[selectedId] ?? null) : null;
+  const selectedWalk = selectedId ? (walks[`${majorId}|${selectedId}`] ?? null) : null;
 
   return (
     <div className="flex h-full min-h-0">
@@ -107,6 +117,7 @@ export function MapView({
             listing={selected as StoredListing}
             groupSize={groupSize}
             walk={selectedWalk}
+            destinationName={majorById(majorId).building}
             onClose={() => onSelect(null)}
           />
         ) : (
@@ -123,7 +134,8 @@ export function MapView({
               </p>
             </div>
 
-            <div className="border-b border-neutral-200 px-4 py-3">
+            <div className="space-y-3 border-b border-neutral-200 px-4 py-3">
+              <MajorPicker value={majorId} onChange={setMajorId} />
               <GroupSizePicker value={groupSize} onChange={setGroupSize} />
             </div>
 
@@ -150,6 +162,7 @@ export function MapView({
           onSelect={onSelect}
           active={active}
           walk={selectedWalk}
+          destination={majorById(majorId)}
         />
       </div>
     </div>

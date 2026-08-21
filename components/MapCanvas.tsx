@@ -6,6 +6,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import type { Coords, Listing } from "@/lib/types";
 import { CAMPUS } from "@/lib/campus";
 import type { WalkRoute } from "@/lib/walk";
+import type { Major } from "@/lib/majors";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -102,6 +103,8 @@ interface MapCanvasProps {
   active: boolean;
   /** Walking route from the selected listing to campus, when we have one. */
   walk: WalkRoute | null;
+  /** The building every walk is measured to. */
+  destination: Major;
 }
 
 export default function MapCanvas({
@@ -110,12 +113,14 @@ export default function MapCanvas({
   onSelect,
   active,
   walk,
+  destination,
 }: MapCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const onSelectRef = useRef(onSelect);
   const walkLabelRef = useRef<mapboxgl.Marker | null>(null);
+  const destinationRef = useRef<mapboxgl.Marker | null>(null);
   const [styleReady, setStyleReady] = useState(false);
 
   // Kept in a ref so marker click handlers, attached once to raw DOM nodes,
@@ -151,6 +156,8 @@ export default function MapCanvas({
     return () => {
       walkLabelRef.current?.remove();
       walkLabelRef.current = null;
+      destinationRef.current?.remove();
+      destinationRef.current = null;
       markers.forEach((m) => m.remove());
       markers.clear();
       map.remove();
@@ -220,6 +227,31 @@ export default function MapCanvas({
       marker.getElement().dataset.selected = String(id === selectedId);
     });
   }, [selectedId, listings]);
+
+  /**
+   * A standing marker on whatever building the walks are measured to.
+   *
+   * Visible before any listing is picked, so choosing a major shows you where
+   * you are actually walking rather than only changing a number.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    destinationRef.current?.remove();
+
+    const el = document.createElement("div");
+    el.className =
+      "flex items-center gap-1.5 whitespace-nowrap rounded-full border border-orange-600 bg-white px-2.5 py-1 text-xs font-medium text-orange-700 shadow-sm";
+    const dot = document.createElement("span");
+    dot.className = "inline-block h-2 w-2 shrink-0 rounded-full bg-orange-600";
+    el.append(dot, document.createTextNode(destination.building));
+    el.title = destination.label;
+
+    destinationRef.current = new mapboxgl.Marker({ element: el })
+      .setLngLat(destination.coords)
+      .addTo(map);
+  }, [destination]);
 
   /**
    * Draw the route, label it, and frame both ends.
