@@ -107,8 +107,24 @@ export async function fetchPublicPage(raw: string): Promise<string> {
   return text.slice(0, MAX_BYTES);
 }
 
+/**
+ * The ceiling on how much text ever reaches the model, in characters.
+ *
+ * This is the per-request cost cap, so both entry points share it rather than
+ * each carrying their own number: a page we fetched, and text a student pasted.
+ * At 40,000 a single request cost roughly 1.2 cents, which made a public
+ * endpoint with no auth on it worth about two thousand requests before a $25
+ * balance was gone. Twelve thousand characters is around three thousand tokens
+ * — comfortably more than any real listing plus the page furniture around it —
+ * and it cuts the worst case by better than three.
+ *
+ * A page whose listing text genuinely starts past 12,000 characters will be
+ * truncated. Raise this if that ever shows up, and know what it costs.
+ */
+export const MAX_LISTING_CHARS = 12_000;
+
 /** Strips a page down to readable text so a model is not billed for markup. */
-export function htmlToText(html: string, maxChars = 40_000): string {
+export function htmlToText(html: string, maxChars = MAX_LISTING_CHARS): string {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
     .replace(/<style[\s\S]*?<\/style>/gi, " ")

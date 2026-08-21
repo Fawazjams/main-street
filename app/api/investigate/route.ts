@@ -1,13 +1,23 @@
 import { NextResponse } from "next/server";
 import { investigate, type InvestigationInput } from "@/lib/checks/investigate";
 import { toMapListing } from "@/lib/checks/toMapListing";
-import { assertPublicUrl, UnsafeUrlError } from "@/lib/checks/safeFetch";
+import {
+  assertPublicUrl,
+  MAX_LISTING_CHARS,
+  UnsafeUrlError,
+} from "@/lib/checks/safeFetch";
 import { claudeConfigured } from "@/lib/checks/parseWithClaude";
 import { listingBySourceUrl, saveInvestigation } from "@/lib/db/listings";
 
-/** Enough text to be a listing, capped so nobody can paste a novel. */
+/**
+ * Enough text to be a listing, capped so nobody can paste a novel.
+ *
+ * The upper bound is shared with the fetched-page path rather than restated,
+ * because it is really one number: the most this endpoint will ever pay a model
+ * to read in a single request. This route is public and unauthenticated, so
+ * that number is the whole exposure.
+ */
 const MIN_TEXT = 40;
-const MAX_TEXT = 40_000;
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -38,7 +48,7 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    input = { kind: "text", text: trimmed.slice(0, MAX_TEXT) };
+    input = { kind: "text", text: trimmed.slice(0, MAX_LISTING_CHARS) };
   } else if (typeof url === "string" && url.trim() !== "") {
     try {
       // Resolves the host and rejects private addresses before any fetch.
