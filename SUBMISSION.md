@@ -23,9 +23,9 @@ real. Three patterns, in order:
 2. **Fee churning** — fees collected again and again with no intent to lease.
 3. **Deposit traps** — money taken before a viewing, then no lease.
 
-A student can't check any of it, and 18-to-29-year-olds are 42% likelier than
-other renters to lose money to a fake listing. The records that would settle it
-exist — just nowhere near where students look.
+A student can't check any of it, and 18-to-29-year-olds are the likeliest renters
+to lose money to a fake listing. The records that would settle it exist — just
+nowhere near where students look.
 
 ### The solution
 
@@ -33,12 +33,12 @@ Main Street takes a rental link, checks it against public records, and puts what
 it found onto a shared campus map.
 
 Seven checks run in about two and a half seconds, and three speak directly to my
-friends' $200. We read the application fee out of the post and multiply it by the
-household, so the real number is visible before anyone pays: our demo listing
+friends' $200. We pull the application fee out of the post and multiply it by the
+household, so the real number shows before anyone pays: our demo listing
 advertises $65 per person — $260 for four — and never says so. We compare the
-asking rent to HUD's benchmark, so overpaying is legible rather than a hunch. And
-we check the pin against the stated address, that address against the county
-appraisal roll, and the named agent against the state licence register.
+rent to HUD's benchmark, so overpaying is legible rather than a hunch. And we
+check the pin against the stated address, that address against the county roll,
+and the named agent against the state licence register.
 
 It doesn't score. No risk number, no "verified" badge — each check states what
 the post claims beside what an independent source says. On our demo listing three
@@ -49,7 +49,7 @@ We don't have to.
 ### Business impact
 
 Findings persist. A first check takes 2.6 seconds; the same link again returns in
-0.3 seconds from the store, spending nothing. The second student reads what the
+0.3 seconds from the store, spending nothing — the second student reads what the
 first one found.
 
 It's also the only way to catch fee churning: one poster collecting fees across
@@ -60,8 +60,7 @@ runs on free public data.
 
 Next.js 16, React 19, TypeScript, Tailwind, Supabase, Mapbox, Vercel. Public data
 from Travis County, HUD, the US Census, the Texas Real Estate Commission and
-OpenStreetMap. Claude Haiku reads listings from sites we have no parser for,
-$0.002 each.
+OpenStreetMap. Claude Haiku reads sites we have no parser for, $0.002 each.
 
 ### Limitations and what's next
 
@@ -71,7 +70,7 @@ and the shareable listing link are the seams they plug into.
 
 We can't verify photos: reverse-image search is an index, not intelligence, and
 the usable ones are paid. Zillow and Apartments.com block automated readers, so
-those go through paste-the-text. County records are Travis County only.
+those paste in as text. County records are Travis County only.
 
 ## 2-minute demo video script
 
